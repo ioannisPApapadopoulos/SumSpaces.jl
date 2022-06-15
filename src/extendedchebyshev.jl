@@ -112,3 +112,6 @@ function getindex(H::ExtendedWeightedChebyshevU{T}, x::Real, j::Int)::T where T
     return 0.
 end
 summary(io::IO, w::ExtendedWeightedChebyshevU{Float64}) = print(io, "ExtendedWeightedChebyshevU()")
+
+==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevU) where kind = true
+==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevT) where kind = false

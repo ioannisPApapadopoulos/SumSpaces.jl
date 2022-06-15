@@ -5,16 +5,17 @@ using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays,
     FillArrays, LazyBandedMatrices, LazyArrays, FFTW, Interpolations, InfiniteArrays,
     QuasiArrays, MathLink, DelimitedFiles
 
-import ClassicalOrthogonalPolynomials: Hilbert, ∞
-import Base: in, axes, getindex
+import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2
+import Base: in, axes, getindex, ==, oneto, *
 import ContinuumArrays: Basis, AbstractQuasiArray
 import InfiniteArrays: OneToInf
 
 include("extendedchebyshev.jl")
 include("sumspace.jl")
 
-export ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
-            SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace
+export  ∞, oneto,
+        ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
+        SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace
 
 
 # Affine transform to scale and shift polys. 
