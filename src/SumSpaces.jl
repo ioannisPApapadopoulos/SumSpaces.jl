@@ -9,6 +9,7 @@ import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2
 import Base: in, axes, getindex, ==, oneto, *
 import ContinuumArrays: Basis, AbstractQuasiArray
 import InfiniteArrays: OneToInf
+import BlockArrays: block, blockindex, Block, _BlockedUnitRange#, BlockSlice
 
 include("extendedchebyshev.jl")
 include("sumspace.jl")
