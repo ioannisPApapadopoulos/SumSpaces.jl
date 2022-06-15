@@ -3,7 +3,7 @@ module SumSpaces
 using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays, 
     ClassicalOrthogonalPolynomials, StaticArrays, ContinuumArrays, DomainSets,
     FillArrays, LazyBandedMatrices, LazyArrays, FFTW, Interpolations, InfiniteArrays,
-    QuasiArrays, MathLink, DelimitedFiles
+    QuasiArrays, DelimitedFiles
 
 import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2
 import Base: in, axes, getindex, ==, oneto, *
