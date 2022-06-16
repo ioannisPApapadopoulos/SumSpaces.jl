@@ -5,18 +5,19 @@ using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays,
     FillArrays, LazyBandedMatrices, LazyArrays, FFTW, Interpolations, InfiniteArrays,
     QuasiArrays, DelimitedFiles
 
-import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2
-import Base: in, axes, getindex, ==, oneto, *
+import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2, Derivative
+import Base: in, axes, getindex, ==, oneto, *, \, +, -, convert, broadcasted
 import ContinuumArrays: Basis, AbstractQuasiArray
 import InfiniteArrays: OneToInf
 import BlockArrays: block, blockindex, Block, _BlockedUnitRange#, BlockSlice
+import BlockBandedMatrices: _BandedBlockBandedMatrix
 
 include("extendedchebyshev.jl")
 include("sumspace.jl")
 
-export  ∞, oneto,
+export  ∞, oneto, Block, Derivative, Hilbert,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
-        SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace
+        SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace, jacobimatrix
 
 
 # Affine transform to scale and shift polys. 

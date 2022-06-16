@@ -51,7 +51,7 @@ end
 # Appended sum space
 ###
 
-struct AppendedSumSpace{AA, CC,E, T} <: Basis{T} 
+struct AppendedSumSpace{AA, CC, E, T} <: Basis{T} 
     A::AA
     C::CC
     I::E
@@ -62,7 +62,7 @@ AppendedSumSpace(A, C, I::Vector{Float64}) where E = AppendedSumSpace{Vector{Flo
 AppendedSumSpace(A, C) = AppendedSumSpace(A, C, [-1.,1.])
 
 
-axes(ASp::AppendedSumSpace) = (Inclusion(ℝ), OneToInf())
+axes(ASp::AppendedSumSpace) = (Inclusion(ℝ), _BlockedUnitRange(1:2:∞))
 
 
 function getindex(ASp::AppendedSumSpace{AA, CC, E, T}, x::Real, j::Int)::T where {AA, CC, E, T}
@@ -70,7 +70,7 @@ function getindex(ASp::AppendedSumSpace{AA, CC, E, T}, x::Real, j::Int)::T where
     if j == 1
         return SumSpace{1, E, T}(ASp.I)[x,1]
     elseif 2<=j<=5
-        return ASp.A[j-1][1](x)
+        return ASp.A[j-1](x)
     else
         return SumSpace{1, E, T}(ASp.I)[x,j-4]
     end
