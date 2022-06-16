@@ -152,7 +152,7 @@ Test functions in sumspace.jl
         end
     end
 
-    @testset "jacobi" begin
+    @testset "jacobimatrix" begin
         Sp = SumSpaceP()
         A = jacobimatrix(Sp)
         @test axes(A) == (1:1:∞, 1:1:∞)

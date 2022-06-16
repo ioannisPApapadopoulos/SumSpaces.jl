@@ -146,23 +146,32 @@ end
 ###
 # Operators
 ###
+"""
+Since the linear system is block-diagonal, we solve element-wise. Hence all these
+operators are constructed element-wise and thus are local operators except for the
+identity map from ASp to Sd which is global. 
+"""
 
 # Identity Sp -> Sd
 function \(Sd::ElementSumSpace{2}, Sp::ElementSumSpace{1})
     Sd.I != Sp.I && error("Element sum spaces bases not centred on same elements")
+    el_no = length(Sp.I) - 1
+
     A = SumSpace{2}() \ SumSpace{1}()
-    return A
+    return [A for j in 1:el_no]
 end
 
 # Hilbert: Sp -> Sp 
 function *(H::Hilbert{<:Any,<:Any,<:Any}, Sp::ElementSumSpace{1})
     T = eltype(Sp)
+    el_no = length(Sp.I) - 1
+
     onevec = mortar(Fill.(convert(T, π), Fill(2,∞)))
     zs = mortar(Zeros.(Fill(2,∞)))
     dat = BlockBroadcastArray(hcat,-onevec,zs,onevec)
     dat = BlockVcat(Fill(0,3)', dat)
     A = _BandedBlockBandedMatrix(dat', (axes(dat,1),axes(dat,1)), (0,0), (1,1))
-    return ApplyQuasiMatrix(*, ElementSumSpace{1,T}(Sp.I), A)
+    return [ApplyQuasiMatrix(*, ElementSumSpace{1,T}(Sp.I), A) for j in 1:el_no]
     # return A
 end
 
@@ -212,7 +221,7 @@ function \(Sd::ElementSumSpace{2}, ASp::ElementAppendedSumSpace)
     Id = [Id[:,4*el_no+1] Id[:,1:4*el_no] Id[:,4*el_no+2:end]] # permute T0 column to start
         # A  = append!(A, [Bm * Id])
     # end
-    Bm = Id_Sp_Sd(ASp)[1:2N+7+(el_no-1)*(2N+6),1:2N+3+(el_no-1)*(2N+2)]
+    Bm = _Id_Sp_Sd(ASp)[1:2N+7+(el_no-1)*(2N+6),1:2N+3+(el_no-1)*(2N+2)]
     Bm[3*el_no+2,1] = 1.
     
     rows = [size(Bm,1)]; cols = vcat([1], Fill(el_no, (2*N+6)))
@@ -224,7 +233,7 @@ function \(Sd::ElementSumSpace{2}, ASp::ElementAppendedSumSpace)
     return A
 end
 
-function Id_Sp_Sd(ASp)
+function _Id_Sp_Sd(ASp)
     T = eltype(ASp)
     el_no = length(ASp.I) - 1
 
@@ -242,20 +251,20 @@ function Id_Sp_Sd(ASp)
 end
 
 # x Sp -> Sp
-function jacobimatrix(Sp::ElementSumSpace{1})
-    # FIXME: Temporary hack in finite-dimensional indexing
-    N = Int64(1e2)
+# function jacobimatrix(Sp::ElementSumSpace{1})
+#     # FIXME: Temporary hack in finite-dimensional indexing
+#     N = Int64(1e2)
+#     el_no = length(ASp.I) - 1
+#     J = jacobimatrix(SumSpace{1}())[1:2N+3,1:2N+3]
+#     J[2,1]=0
 
-    J = jacobimatrix(SumSpace{1}())[1:2N+3,1:2N+3]
-    J[2,1]=0
+#     Jm = []
 
-    Jm = []
+#     a = (Sp.I[1:end-1] + Sp.I[2:end]) ./ 2
+#     for j = 1:(length(Sp.I)-1)
+#         J[1,1] = a[j]
+#         append!(Jm, [J[1:end,1:end]])
+#     end
 
-    a = (Sp.I[1:end-1] + Sp.I[2:end]) ./ 2
-    for j = 1:(length(Sp.I)-1)
-        J[1,1] = a[j]
-        append!(Jm, [J[1:end,1:end]])
-    end
-
-    return Jm
-end
+#     return [Jm for j in 1:el_no]
+# end

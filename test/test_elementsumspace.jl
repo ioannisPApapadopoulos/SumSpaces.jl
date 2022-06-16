@@ -1,4 +1,4 @@
-using Test, SumSpaces, ClassicalOrthogonalPolynomials
+using Test, SumSpaces
 
 @testset "element-sumspace" begin
     @testset "basics" begin
@@ -92,4 +92,113 @@ using Test, SumSpaces, ClassicalOrthogonalPolynomials
         end
 
     end
+
+    @testset "BlockStructure" begin
+        a = [-3.,-1, 1, 3]
+        Sp = ElementSumSpaceP(a)
+        Sd = ElementSumSpaceD(a)
+        f = x -> x
+        uS = ([f,f,f],[f,f,f],[f,f,f],[f,f,f])
+        ASp = ElementAppendedSumSpace(uS, [], a)
+
+
+        @test axes(Sp[0.1, Block.(1:3)]) == (1:1:7,)
+        @test Sp[0.1, Block.(1:3)] == Sp[0.1,1:7]
+        @test axes(Sd[0.1, Block.(1:3)]) == (1:1:7,)
+        @test Sd[0.1, Block.(1:3)] == Sd[0.1,1:7]
+        @test axes(ASp[0.1, Block.(1:3)]) == (1:1:7,)
+        @test ASp[0.1, Block.(1:3)] == ASp[0.1,1:7]
+    end
+
+    @testset "Identity maps" begin
+        a = [-5.,-1, 1, 2]
+        eSp = ElementSumSpaceP(a)
+        eSd = ElementSumSpaceD(a)
+        Sp = SumSpaceP()
+        Sd = SumSpaceD()
+
+        eA = (eSd \ eSp)
+        A = (Sd \ Sp)
+        @test eA[1][1:100,1:100] == A[1:100,1:100]
+
+        # Should not need first for loop but A[Block.(1:20), Block.(1:20)]
+        # errors and it's not within this packages' scope.
+        for N = 1:20
+            for j in 1:3
+                @test eA[j][Block.(N), Block.(1:20)] == A[Block.(N), Block.(1:20)]
+            end
+        end
+    end
+
+    @testset "derivative" begin
+        a = [-5.,-1, 1, 2] 
+        Sp = ElementSumSpaceP(a)
+        
+        x = axes(Sp, 1)
+        A_Sd = Derivative(x)*Sp
+
+        Sd = ElementSumSpaceD(a)
+
+        A = [Sd \ A_Sd[j] for j = 1:3]
+        @test axes(A[1]) == (1:1:∞, 1:1:∞)
+        for j = 1:3
+            @test A[j][1,1] ≈ 0
+            @test A[j][2,1] ≈ 0
+            @test A[j][2:3,2:3] ≈ [[0,0] [0,0]]
+            @test A[j][4:5,2:3] ≈ [[-2/(a[j+1]-a[j]),0] [0,2/(a[j+1]-a[j])]]
+            @test A[j][Block.(2), Block.(2)] == A[j][2:3,2:3]
+            for N = 3:20
+                @test A[j][Block.(N), Block.(N-1)] == [[-2/(a[j+1]-a[j])*(N-2),0] [0,2/(a[j+1]-a[j])*(N-2)]]
+            end
+        end
+    end
+
+    @testset "hilbert" begin
+        a = [-5.,-1, 1, 2]
+        eSp = ElementSumSpaceP(a)
+        eSd = ElementSumSpaceD(a)
+        Sp = SumSpaceP()
+        Sd = SumSpaceD()
+
+        x = axes(eSp, 1)
+        H = inv.(x .- x')
+        H_eSp = H*eSp
+        H_Sp = H*Sp
+
+        eA = [eSp \ H_eSp[j] for j in 1:3]
+        A = Sp \ H_Sp
+        for j in 1:3
+            @test axes(eA[j]) == (1:1:∞, 1:1:∞)
+            @test eA[j][1:100,1:100] == A[1:100,1:100]
+            for N = 2:10
+                @test eA[j][Block.(N), Block.(N)] == A[Block.(N), Block.(N)]
+            end
+        end
+    end
+
+    @testset "appended-identity" begin
+        a = [-5.,-1, 1, 2]
+        f = x -> x
+        uS = ([f,f,f],[f,f,f],[f,f,f],[f,f,f])
+        cuS = [[[1.],[1.],[1.]], [[2.],[2.],[2.]], [[3.],[3.],[3.]], [[4.],[4.],[4.]]]
+        
+        ASp = ElementAppendedSumSpace(uS, cuS, a)
+        Sp = ElementSumSpaceP(a)
+        Sd = ElementSumSpaceD(a)
+
+        A = Sd \ ASp
+        B = Sd \ Sp
+
+        el_no = length(a)-1
+
+        @test A[1,1] ≈ -1
+        @test A[3el_no+2, 1] ≈ 1 
+        for N = 2:5
+            @test A[1,Block.(N)] ≈ -[N-1,N-1,N-1]
+            @test A[3el_no+2, Block.(N)] ≈ [N-1,N-1,N-1]
+        end
+        @test A[2:4,Block.(6)] ≈ [[0.5,0,0] [0,0.5,0] [0,0,0.5]]
+        @test A[3el_no+5:3el_no+7,Block.(6)] ≈ -[[0.5,0,0] [0,0.5,0] [0,0,0.5]]
+    end
+
 end
