@@ -5,7 +5,7 @@ using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays,
     FillArrays, LazyBandedMatrices, LazyArrays, FFTW, Interpolations, InfiniteArrays,
     QuasiArrays, DelimitedFiles
 
-import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2, Derivative
+import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2, Derivative, jacobimatrix
 import Base: in, axes, getindex, ==, oneto, *, \, +, -, convert, broadcasted
 import ContinuumArrays: Basis, AbstractQuasiArray
 import InfiniteArrays: OneToInf
@@ -14,10 +14,12 @@ import BlockBandedMatrices: _BandedBlockBandedMatrix
 
 include("extendedchebyshev.jl")
 include("sumspace.jl")
+include("element-sumspace.jl")
 
 export  ∞, oneto, Block, Derivative, Hilbert,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
-        SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace, jacobimatrix
+        SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace, jacobimatrix,
+        ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace
 
 
 # Affine transform to scale and shift polys. 

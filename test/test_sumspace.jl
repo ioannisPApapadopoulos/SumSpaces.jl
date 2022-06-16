@@ -1,4 +1,5 @@
-using Test, SumSpaces, ClassicalOrthogonalPolynomials
+using Test, ClassicalOrthogonalPolynomials
+using SumSpaces
 
 """
 Test functions in sumspace.jl
@@ -178,8 +179,8 @@ Test functions in sumspace.jl
         B = Sd \ Sp
 
         @test A[1:10,1] == B[1:10,1]
-        @test A[1,3:4] ≈ [-1,-2,-3,-4]
-        @test A[5,3:4] ≈ [1,2,3,4]
+        @test A[1,2:5] ≈ [-1,-2,-3,-4]
+        @test A[5,2:5] ≈ [1,2,3,4]
         @test A[1:30, 6:35] == B[1:30,2:31]
     end
 end
