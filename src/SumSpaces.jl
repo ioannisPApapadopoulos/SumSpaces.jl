@@ -12,14 +12,16 @@ import InfiniteArrays: OneToInf
 import BlockArrays: block, blockindex, Block, _BlockedUnitRange#, BlockSlice
 import BlockBandedMatrices: _BandedBlockBandedMatrix
 
-include("extendedchebyshev.jl")
-include("sumspace.jl")
-include("element-sumspace.jl")
+include("chebyshev/extendedchebyshev.jl")
+include("chebyshev/sumspace.jl")
+include("chebyshev/element-sumspace.jl")
+include("jacobi/extendedjacobi.jl")
 
 export  ∞, oneto, Block, Derivative, Hilbert,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
         SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace, jacobimatrix,
-        ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace
+        ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace,
+        ExtendedJacobi, ExtendedWeightedJacobi
 
 
 # Affine transform to scale and shift polys. 
