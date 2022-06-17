@@ -25,8 +25,6 @@ export  ∞, oneto, Block, Derivative, Hilbert,
 
 
 # Affine transform to scale and shift polys. 
-function affinetransform(a,b,x)
-    y = 2 ./(b.-a) .* (x.-(a.+b)./2)
-end
+affinetransform(a,b,x) = 2 /(b-a) * (x-(a+b)/2)
 
 end # module

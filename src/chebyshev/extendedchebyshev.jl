@@ -33,8 +33,7 @@ function getindex(H::ExtendedChebyshevT{T}, x::Real, j::Int)::T where T
         # return zero(T) # Experimental decaying support
         return one(T)
     else
-        ξ = inv(x + sqrtx2(x))
-        return transpose(ξ.^(j-1))
+        return (x + sqrtx2(x))^(1-j)
     end
 end
 
@@ -61,24 +60,24 @@ function getindex(H::ExtendedChebyshevU{T}, x::Real, j::Int)::T where T
 
     # eU_-1 = HilbertTransform[wT_1] - 1
     if j == 1
-        x in ChebyshevInterval() && return zero(T)
-        ξ = - sign(x) .* x ./ sqrt.(x.^2 .- one(T))
+        abs(x) ≤ 1 && return zero(T)
+        ξ = - sign(x) * x / sqrt(x^2 - one(T))
     # eU_0 = HilbertTransform[wT_0]
     elseif j == 2
-        x in ChebyshevInterval() && return zero(T)
-        ξ = - sign(x) ./ sqrt.(x.^2 .- one(T))
+        abs(x) ≤ 1 && return zero(T)
+        ξ = - sign(x) / sqrt(x^2 - one(T))
     elseif isodd(j)
-        x in ChebyshevInterval() && return ChebyshevU{T}()[x,j-2]
+        abs(x) ≤ 1 && return ChebyshevU{T}()[x,j-2]
         η = inv(x + sqrtx2(x))
-        ξ = 2 .* sum(η .^(2:2:j-3)) + one(T) .- sign(x) .* x ./ sqrt.(x.^2 .- one(T))
-        # ξ = 2 .* sum(η .^(2:2:j-3)) .- abs(x) ./ sqrt.(x.^2 .- one(T)) # decaying support
+        ξ = 2 * sum(η .^(2:2:j-3)) + one(T) - sign(x) * x / sqrt(x^2 - one(T))
+        # ξ = 2 * sum(η .^(2:2:j-3)) - abs(x) / sqrt(x^2 - one(T)) # decaying support
     else
-        x in ChebyshevInterval() && return ChebyshevU{T}()[x,j-2]
+        abs(x) ≤ 1 && return ChebyshevU{T}()[x,j-2]
         η = inv(x + sqrtx2(x))
-        ξ = 2 .* sum(η .^(1:2:j-3)) .- sign(x) ./ sqrt.(x.^2 .- one(T))
+        ξ = 2 * sum(η .^(1:2:j-3)) - sign(x) / sqrt(x^2 - one(T))
     end
         
-    return transpose(ξ)
+    return ξ
 end
 
 struct ExtendedWeightedChebyshev{kind,T} <: Basis{T} end
@@ -109,9 +108,9 @@ const ExtendedWeightedChebyshevU = ExtendedWeightedChebyshev{2}
 
 function getindex(H::ExtendedWeightedChebyshevU{T}, x::Real, j::Int)::T where T
     x in ChebyshevInterval() && return Weighted(ChebyshevU{T}())[x,j]
-    return 0.
+    return zero(T)
 end
 summary(io::IO, w::ExtendedWeightedChebyshevU{Float64}) = print(io, "ExtendedWeightedChebyshevU()")
 
-==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevU) where kind = true
-==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevT) where kind = false
+==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevU) = true
+==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevT) = false

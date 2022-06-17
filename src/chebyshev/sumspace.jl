@@ -8,20 +8,14 @@ on (-∞,∞).
 # Primal and dual sum space
 ###
 
-struct SumSpace{kind,E,T} <: Basis{T} 
+struct SumSpace{kind,T,E} <: Basis{T} 
     I::E
 end
-SumSpace{kind, T}(I::Vector{T}) where {kind, T} = SumSpace{kind,Vector{T},T}(I::Vector{T})
-SumSpace{kind}(I::Vector{Float64}) where kind = SumSpace{kind,Float64}(I::Vector{Float64})
-SumSpace{kind}() where kind = SumSpace{kind}([-1.,1.])
+SumSpace{kind, T}(I::AbstractVector=[-1.,1.]) where {kind, T} = SumSpace{kind, T, typeof(I)}(I)
+SumSpace{kind}(I::AbstractVector=[-1.,1.]) where kind = SumSpace{kind, Float64}(I)
 
-function SumSpaceP(a=[-1,1.])
-    SumSpace{1}(a)
-end
-
-function SumSpaceD(a=[-1.,1.])
-    SumSpace{2}(a)
-end
+const SumSpaceP = SumSpace{1}
+const SumSpaceD = SumSpace{2}
 
 axes(S::SumSpace) = (Inclusion(ℝ), _BlockedUnitRange(1:2:∞))
 
@@ -35,13 +29,13 @@ end
 
 ==(a::SumSpace, b::SumSpace) = false
 
-function getindex(S::SumSpace{1, E, T}, x::Real, j::Int)::T where {E, T}
+function getindex(S::SumSpaceP{T}, x::Real, j::Int)::T where T
     y = affinetransform(S.I[1],S.I[2], x)
     isodd(j) && return ExtendedChebyshevT{T}()[y, (j ÷ 2)+1]
     ExtendedWeightedChebyshevU{T}()[y, j ÷ 2]
 end
 
-function getindex(S::SumSpace{2, E, T}, x::Real, j::Int)::T where {E, T}
+function getindex(S::SumSpaceD{T}, x::Real, j::Int)::T where T
     y = affinetransform(S.I[1],S.I[2], x)
     isodd(j) && return ExtendedChebyshevU{T}()[y, (j ÷ 2)+1]
     ExtendedWeightedChebyshevT{T}()[y, j ÷ 2]
@@ -51,28 +45,27 @@ end
 # Appended sum space
 ###
 
-struct AppendedSumSpace{AA, CC, E, T} <: Basis{T} 
-    A::AA
-    C::CC
+struct AppendedSumSpace{T, E} <: Basis{T} 
+    A
+    C
     I::E
 end
-AppendedSumSpace{E,T}(A, C, I::Vector{Float64}) where {E,T} = AppendedSumSpace{Any,Any,E,T}(A, C, I::Vector{Float64})
-AppendedSumSpace{E}(A, C, I::Vector{Float64}) where E = AppendedSumSpace{E,Float64}(A, C, I::Vector{Float64})
-AppendedSumSpace(A, C, I::Vector{Float64}) where E = AppendedSumSpace{Vector{Float64}}(A, C, I::Vector{Float64})
+AppendedSumSpace{T}(A, C, I::AbstractVector) where T = AppendedSumSpace{T,typeof(I)}(A, C, I)
+AppendedSumSpace(A, C, I::AbstractVector) = AppendedSumSpace{Float64}(A, C, I)
 AppendedSumSpace(A, C) = AppendedSumSpace(A, C, [-1.,1.])
 
 
 axes(ASp::AppendedSumSpace) = (Inclusion(ℝ), _BlockedUnitRange(1:2:∞))
 
 
-function getindex(ASp::AppendedSumSpace{AA, CC, E, T}, x::Real, j::Int)::T where {AA, CC, E, T}
+function getindex(ASp::AppendedSumSpace{T}, x::Real, j::Int)::T where T
 
     if j == 1
-        return SumSpace{1, E, T}(ASp.I)[x,1]
+        return SumSpaceP{T}(ASp.I)[x,1]
     elseif 2<=j<=5
         return ASp.A[j-1](x)
     else
-        return SumSpace{1, E, T}(ASp.I)[x,j-4]
+        return SumSpaceP{T}(ASp.I)[x,j-4]
     end
 end
 
@@ -82,7 +75,7 @@ end
 
 # Credit to Timon Gutleb for help for the below implementation of the identity mapping
 # Identity Sp -> Sd
-function \(Sd::SumSpace{2}, Sp::SumSpace{1})
+function \(Sd::SumSpaceD, Sp::SumSpaceP)
     Sd.I != Sp.I && error("Sum spaces bases not centred on same element")
     T = promote_type(eltype(Sp), eltype(Sd))
     halfvec = mortar(Fill.(1/2,Fill(2,∞)))
@@ -96,7 +89,7 @@ function \(Sd::SumSpace{2}, Sp::SumSpace{1})
 end
 
 # Identity ASp -> Sd
-function \(Sd::SumSpace{2}, ASp::AppendedSumSpace)
+function \(Sd::SumSpaceD, ASp::AppendedSumSpace)
     Sd.I != ASp.I && error("Sum spaces bases not centred on same element")
     T = promote_type(eltype(ASp), eltype(Sd))
     
@@ -116,7 +109,7 @@ function \(Sd::SumSpace{2}, ASp::AppendedSumSpace)
 
     # FIXME: Temporary hack in finite-dimensional indexing
     N = Int64(5e2)
-    Bm = (Sd \ SumSpace{1,Vector{T},T}(ASp.I))[1:2N+7,1:2N+3]    
+    Bm = (Sd \ SumSpaceP{T}(ASp.I))[1:2N+7,1:2N+3]    
     B = BlockBroadcastArray(hcat, ASp.C[1][1],ASp.C[2][1],ASp.C[3][1],ASp.C[4][1])[1:end,1:end]
     zs = Zeros(∞,4)
     B = vcat(B, zs)
@@ -128,7 +121,7 @@ function \(Sd::SumSpace{2}, ASp::AppendedSumSpace)
 end
 
 # Derivative Sp -> Sd
-function *(D::Derivative{<:Real}, Sp::SumSpace{1})
+function *(D::Derivative, Sp::SumSpaceP)
     T = eltype(Sp)
     (a,b) = Sp.I
 
@@ -139,22 +132,22 @@ function *(D::Derivative{<:Real}, Sp::SumSpace{1})
     dat = BlockBroadcastArray(hcat,zs,ld)
     dat = BlockVcat(Fill(0,2)', dat)
     A = _BandedBlockBandedMatrix(dat', (axes(dat,1),axes(dat,1)), (1,0), (0,0))
-    return ApplyQuasiMatrix(*, SumSpace{2,T}(Sp.I), A)
+    return ApplyQuasiMatrix(*, SumSpaceD{T}(Sp.I), A)
 end
 
 # Hilbert: Sp -> Sp 
-function *(H::Hilbert{<:Any,<:Any,<:Any}, Sp::SumSpace{1})
+function *(H::Hilbert, Sp::SumSpaceP)
     T = eltype(Sp)
     onevec = mortar(Fill.(convert(T, π), Fill(2,∞)))
     zs = mortar(Zeros.(Fill(2,∞)))
     dat = BlockBroadcastArray(hcat,-onevec,zs,onevec)
     dat = BlockVcat(Fill(0,3)', dat)
     A = _BandedBlockBandedMatrix(dat', (axes(dat,1),axes(dat,1)), (0,0), (1,1))
-    return ApplyQuasiMatrix(*, SumSpace{1,T}(Sp.I), A)
+    return ApplyQuasiMatrix(*, SumSpaceP{T}(Sp.I), A)
 end
 
 # x Sp -> Sp
-function jacobimatrix(Sp::SumSpace{1})
+function jacobimatrix(Sp::SumSpaceP)
     T = eltype(Sp)
     halfvec = mortar(Fill.(1/2,Fill(2,∞)))
     zs = mortar(Zeros.(Fill(2,∞)))
