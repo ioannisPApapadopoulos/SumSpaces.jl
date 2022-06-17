@@ -3,37 +3,27 @@
 # Element sum space
 ###
 
-struct ElementSumSpace{kind,E,T} <: Basis{T} 
+struct ElementSumSpace{kind,T,E} <: Basis{T} 
     I::E
 end
-ElementSumSpace{kind, T}(I::Vector{T}) where {kind, T} = ElementSumSpace{kind,Vector{T},T}(I::Vector{T})
-ElementSumSpace{kind}(I::Vector{Float64}) where kind = ElementSumSpace{kind,Float64}(I::Vector{Float64})
+ElementSumSpace{kind, T}(I::AbstractVector{T}) where {kind, T} = ElementSumSpace{kind,T,typeof(I)}(I)
+ElementSumSpace{kind}(I::AbstractVector) where kind = ElementSumSpace{kind,Float64}(I)
 ElementSumSpace{kind}() where kind = ElementSumSpace{kind}([-1.,1.])
 
-function ElementSumSpaceP(a=[-1,1.])
-    ElementSumSpace{1}(a)
-end
 
-function ElementSumSpaceD(a=[-1,1.])
-    ElementSumSpace{2}(a)
-end
+const ElementSumSpaceP = ElementSumSpace{1}
+const ElementSumSpaceD = ElementSumSpace{2}
 
 axes(ES::ElementSumSpace) = (Inclusion(ℝ), _BlockedUnitRange(1:(length(ES.I)-1):∞))
 
-function ==(a::ElementSumSpace{kind}, b::ElementSumSpace{kind}) where kind
-    if a.I == b.I 
-        return true
-    else
-        return false
-    end
-end
+==(a::ElementSumSpace{kind}, b::ElementSumSpace{kind}) where kind = a.I == b.I
 ==(a::ElementSumSpace, b::ElementSumSpace) = false
 
-function getindex(ES::ElementSumSpace{1, E, T}, x::Real, j::Int)::T where {E, T}
+function getindex(ES::ElementSumSpaceP{T}, x::Real, j::Int) where T
 
     el_no = length(ES.I)-1
     if j == 1
-        return SumSpace{1}()[x, 1]
+        return SumSpace{1,T}()[x, 1]
     else
         ind = (j-2) ÷ el_no + 1                # Block number - 1
         i = isodd(ind) ? (ind ÷ 2)+1 : ind ÷ 2 # Poly/function order
@@ -49,7 +39,7 @@ function getindex(ES::ElementSumSpace{1, E, T}, x::Real, j::Int)::T where {E, T}
     end
 end
 
-function getindex(ES::ElementSumSpace{2, E, T}, x::Real, j::Int)::T where {E, T}
+function getindex(ES::ElementSumSpaceD{T}, x::Real, j::Int) where T
 
     el_no = length(ES.I)-1
     if j == 1
@@ -66,7 +56,6 @@ function getindex(ES::ElementSumSpace{2, E, T}, x::Real, j::Int)::T where {E, T}
         else
             return ExtendedChebyshevU{T}()[y, i+1]
         end
-
     end
 end
 
@@ -81,21 +70,19 @@ end
 # Element appended sum space
 ###
 
-struct ElementAppendedSumSpace{AA, CC,E, T} <: Basis{T} 
-    A::AA
-    C::CC
+struct ElementAppendedSumSpace{T, E} <: Basis{T} 
+    A
+    C
     I::E
 end
-ElementAppendedSumSpace{E,T}(A, C, I::Vector{Float64}) where {E,T} = ElementAppendedSumSpace{Any,Any,E,T}(A, C, I::Vector{Float64})
-ElementAppendedSumSpace{E}(A, C, I::Vector{Float64}) where E = ElementAppendedSumSpace{E,Float64}(A, C, I::Vector{Float64})
-ElementAppendedSumSpace(A, C, I::Vector{Float64}) = ElementAppendedSumSpace{Vector{Float64}}(A, C, I::Vector{Float64})
+ElementAppendedSumSpace{T}(A, C, I::AbstractVector) where T = ElementAppendedSumSpace{T,typeof(I)}(A, C, I)
+ElementAppendedSumSpace(A, C, I::AbstractVector) = ElementAppendedSumSpace{Float64}(A, C, I)
 ElementAppendedSumSpace(A, C) = ElementAppendedSumSpace(A, C, [-1.,1.])
 
 axes(ASp::ElementAppendedSumSpace) = (Inclusion(ℝ), _BlockedUnitRange(1:(length(ASp.I)-1):∞))
 
 
-function getindex(ASp::ElementAppendedSumSpace{AA, CC, E, T}, x::Real, j::Int)::T where {AA, CC, E, T}
-    
+function getindex(ASp::ElementAppendedSumSpace{T}, x::Real, j::Int) where T    
     el_no = length(ASp.I)-1
     ind = (j-2) ÷ el_no + 1                    
     i = isodd(ind) ? (ind ÷ 2)-1 : (ind ÷ 2)-2   # Poly/function order
@@ -103,9 +90,9 @@ function getindex(ASp::ElementAppendedSumSpace{AA, CC, E, T}, x::Real, j::Int)::
     ind += 1                                   # Block number
     
     if j == 1
-        return SumSpace{1, E, T}(ASp.I)[x,1]
+        return SumSpace{1, T}(ASp.I)[x,1]
     elseif 2<=ind<=5
-        return ASp.A[ind-1][el](x)[1]
+        return convert(T, ASp.A[ind-1][el](x)[1])
     else
         y = affinetransform(ASp.I[el],ASp.I[el+1], x)
         if iseven(ind)
@@ -153,7 +140,7 @@ identity map from ASp to Sd which is global.
 """
 
 # Identity Sp -> Sd
-function \(Sd::ElementSumSpace{2}, Sp::ElementSumSpace{1})
+function \(Sd::ElementSumSpaceD, Sp::ElementSumSpaceP)
     Sd.I != Sp.I && error("Element sum spaces bases not centred on same elements")
     el_no = length(Sp.I) - 1
 
@@ -162,7 +149,7 @@ function \(Sd::ElementSumSpace{2}, Sp::ElementSumSpace{1})
 end
 
 # Hilbert: Sp -> Sp 
-function *(H::Hilbert{<:Any,<:Any,<:Any}, Sp::ElementSumSpace{1})
+function *(H::Hilbert, Sp::ElementSumSpaceP)
     T = eltype(Sp)
     el_no = length(Sp.I) - 1
 
@@ -171,12 +158,12 @@ function *(H::Hilbert{<:Any,<:Any,<:Any}, Sp::ElementSumSpace{1})
     dat = BlockBroadcastArray(hcat,-onevec,zs,onevec)
     dat = BlockVcat(Fill(0,3)', dat)
     A = _BandedBlockBandedMatrix(dat', (axes(dat,1),axes(dat,1)), (0,0), (1,1))
-    return [ApplyQuasiMatrix(*, ElementSumSpace{1,T}(Sp.I), A) for j in 1:el_no]
+    return [ApplyQuasiMatrix(*, ElementSumSpaceP{T}(Sp.I), A) for j in 1:el_no]
     # return A
 end
 
 # Derivative Sp -> Sd
-function *(D::Derivative{<:Real}, Sp::ElementSumSpace{1})
+function *(D::Derivative, Sp::ElementSumSpaceP)
     T = eltype(Sp)
     el_no = length(Sp.I) - 1
 
@@ -191,19 +178,19 @@ function *(D::Derivative{<:Real}, Sp::ElementSumSpace{1})
         dat = BlockVcat(Fill(0,2)', dat)
         append!(A, [_BandedBlockBandedMatrix(dat', (axes(dat,1),axes(dat,1)), (1,0), (0,0))])
     end
-    return [ApplyQuasiMatrix(*, ElementSumSpace{2,T}(Sp.I), A[j]) for j in 1:el_no]
+    return [ApplyQuasiMatrix(*, ElementSumSpaceD{T}(Sp.I), A[j]) for j in 1:el_no]
     # return A
 end
 
 # Identity ASp -> Sd
-function \(Sd::ElementSumSpace{2}, ASp::ElementAppendedSumSpace)
+function \(Sd::ElementSumSpaceD, ASp::ElementAppendedSumSpace)
     Sd.I != ASp.I && error("Sum spaces bases not centred on same element")
     T = promote_type(eltype(ASp), eltype(Sd))
     el_no = length(ASp.I)-1
 
     # FIXME: Temporary hack in finite-dimensional indexing
     N = Int64(1e2)
-    # Bm = (Sd \ ElementSumSpace{1,Vector{T},T}(ASp.I))[1:2N+7,1:2N+3] 
+    # Bm = (Sd \ ElementSumSpaceP{Vector{T},T}(ASp.I))[1:2N+7,1:2N+3] 
     zs = Zeros(∞,4*el_no) 
     A = []
     
@@ -238,20 +225,20 @@ function _Id_Sp_Sd(ASp)
     el_no = length(ASp.I) - 1
 
     zs = mortar(Zeros.(Fill(2*el_no,∞)))
-    fracvec = mortar(Fill.(0.5,Fill(2*el_no,∞)))
+    fracvec = mortar(Fill.(one(T)/2,Fill(2*el_no,∞)))
     ld = Diagonal(((-1).^((0:∞).÷el_no)) )*fracvec
     dat = BlockBroadcastArray(hcat,zs,ld)
     
     # dat = BlockBroadcastArray(hcat,ld,zs,zs,zs,zs,zs,zs,zs,-ld,zs,zs,zs)
     dat = BlockBroadcastArray(hcat,ld,zs,-ld)
     # dat = BlockVcat([-1.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.]', dat)
-    dat = BlockVcat([-1.,0.,0.]', dat)
+    dat = BlockVcat(T[-1, 0 , 0]', dat)
     A = _BandedBlockBandedMatrix(dat', (axes(dat,1),axes(dat,1)), (2,0), (0,0))   
     return A
 end
 
 # x Sp -> Sp
-# function jacobimatrix(Sp::ElementSumSpace{1})
+# function jacobimatrix(Sp::ElementSumSpaceP)
 #     # FIXME: Temporary hack in finite-dimensional indexing
 #     N = Int64(1e2)
 #     el_no = length(ASp.I) - 1
