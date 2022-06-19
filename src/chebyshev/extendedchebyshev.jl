@@ -114,3 +114,22 @@ summary(io::IO, w::ExtendedWeightedChebyshevU{Float64}) = print(io, "ExtendedWei
 
 ==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevU) = true
 ==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevT) = false
+
+
+###
+# inner products
+###
+
+@simplify *(Tc::QuasiAdjoint{<:Any,<:ExtendedChebyshevT}, V::ExtendedWeightedChebyshevT) =
+    ChebyshevT{eltype(Tc)}()'Weighted(ChebyshevT{eltype(V)}())
+@simplify *(Tc::QuasiAdjoint{<:Any,<:ChebyshevT}, V::ExtendedWeightedChebyshevT) =
+    Tc*Weighted(ChebyshevT{eltype(V)}())    
+@simplify *(Tc::QuasiAdjoint{<:Any,<:ExtendedChebyshevT}, V::Weighted{<:Any,<:ChebyshevT}) =
+    ChebyshevT{eltype(Tc)}()'V
+
+
+@simplify function *(Tc::QuasiAdjoint{<:Any,<:ExtendedChebyshevT}, Ũ::ExtendedChebyshevU)
+    M = ChebyshevU{eltype(Tc)}()'ChebyshevT{eltype(Ũ)}() # TODO:Check
+    TT = eltype(M)
+    ApplyArray(hvcat, 2, convert(TT,Inf), Zeros{TT}(1,∞), Zeros{TT}(∞), M)
+end

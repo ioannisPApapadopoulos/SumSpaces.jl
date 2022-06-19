@@ -1,9 +1,6 @@
 using Test, SumSpaces, ClassicalOrthogonalPolynomials
 import ClassicalOrthogonalPolynomials: sqrtx2
 
-"""
-Test functions in extendedchebyshev.jl
-"""
 
 @testset "ExtendedChebyshev" begin
     
@@ -72,9 +69,9 @@ Test functions in extendedchebyshev.jl
             @test @inferred(eU[0.1,2]) ≈ 0
             @test @inferred(eU[1.1,2]) ≈ - 1 / sqrt(1.1^2 - 1)
 
-            η = x->inv.(x .+ sqrtx2.(x))
-            ξo = (x,j) -> 2 .* sum(η(x).^(2:2:j-3)) .+ 1 .- sign(x) .* x ./ sqrt.(x.^2 .- 1)
-            ξe = (x,j) -> 2 .* sum(η(x).^(1:2:j-3)) .- sign.(x) ./ sqrt.(x.^2 .- 1)
+            η = x->inv(x + sqrtx2(x))
+            ξo = (x,j) -> 2 * sum(η(x).^(2:2:j-3)) + 1 - sign(x) * x / sqrt(x^2 - 1)
+            ξe = (x,j) -> 2 * sum(η(x).^(1:2:j-3)) - sign(x) / sqrt(x^2 - 1)
 
             for N = 3:2:11
                 @test @inferred(eU[0.1,3:N+2]) ≈ U[0.1,1:N]
@@ -97,5 +94,16 @@ Test functions in extendedchebyshev.jl
 
     end
 
+    @testset "innerprods" begin
+        T̃ = ExtendedChebyshevT()
+        Ṽ = ExtendedWeightedChebyshevT()
+        Ũ = ExtendedChebyshevU()
+        T = ChebyshevT()
+        V = Weighted(ChebyshevT())
 
+        @test (T̃'Ṽ)[1:10,1:10] == (Ṽ'T̃)[1:10,1:10] == (T̃'V)[1:10,1:10] ==
+                (V'T̃)[1:10,1:10] == (T'Ṽ)[1:10,1:10] == (Ṽ'T)[1:10,1:10]
+
+        T̃'Ũ
+    end
 end

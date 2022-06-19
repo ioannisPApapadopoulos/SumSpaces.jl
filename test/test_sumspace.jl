@@ -1,9 +1,4 @@
-using Test, ClassicalOrthogonalPolynomials
-using SumSpaces
-
-"""
-Test functions in sumspace.jl
-"""
+using Test, ClassicalOrthogonalPolynomials, SumSpaces
 
 @testset "sumspace" begin
     @testset "basics" begin
@@ -27,7 +22,7 @@ Test functions in sumspace.jl
         @test Spa != Sda
     end
 
-    @testset "Evaluation" begin 
+    @testset "Evaluation" begin
         @testset "primal" begin
             Sp = SumSpaceP()
             wU = ExtendedWeightedChebyshevU()
@@ -72,7 +67,7 @@ Test functions in sumspace.jl
 
             end
         end
-        
+
         @testset "appended" begin
             f = x -> x
             uS = (f,f,f,f)
@@ -81,7 +76,7 @@ Test functions in sumspace.jl
 
             @test ASp[0.1,oneto(0)] == Float64[]
             @test ASp[0.1,oneto(1)] ≈ Sp[0.1,oneto(1)]
-            @test ASp[0.1,oneto(7)] ≈ [Sp[0.1,1], f(0.1), f(0.1), f(0.1), f(0.1), Sp[0.1,2], Sp[0.1,3]]            
+            @test ASp[0.1,oneto(7)] ≈ [Sp[0.1,1], f(0.1), f(0.1), f(0.1), f(0.1), Sp[0.1,2], Sp[0.1,3]]
         end
     end
 
@@ -182,5 +177,15 @@ Test functions in sumspace.jl
         @test A[1,2:5] ≈ [-1,-2,-3,-4]
         @test A[5,2:5] ≈ [1,2,3,4]
         @test A[1:30, 6:35] == B[1:30,2:31]
+    end
+
+    @testset "sqrt-Δ" begin
+        Sp = SumSpaceP()
+        Sd = SumSpaceD()
+
+        x = axes(Sp, 1)
+        H = inv.(x .- x')
+        D = Derivative(x)
+        Δ_s = Sd\D*H*Sp
     end
 end

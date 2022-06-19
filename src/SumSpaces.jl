@@ -5,7 +5,7 @@ using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays,
     FillArrays, LazyBandedMatrices, LazyArrays, FFTW, Interpolations, InfiniteArrays,
     QuasiArrays, DelimitedFiles
 
-import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2, Derivative, jacobimatrix
+import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2, Derivative, jacobimatrix, @simplify
 import Base: in, axes, getindex, ==, oneto, *, \, +, -, convert, broadcasted
 import ContinuumArrays: Basis, AbstractQuasiArray
 import InfiniteArrays: OneToInf
