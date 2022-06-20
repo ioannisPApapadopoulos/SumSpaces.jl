@@ -7,7 +7,7 @@ using SumSpaces, LazyArrays, LazyBandedMatrices, Test
     x = axes(P, 1)
     H = inv.(x .- x')
     D = Derivative(x)
-    Δ_s = Q\D*H*P
+    Δ_s = (Q\D*H*P) # π * (im*k * (-im*k))
 
     P'Q
     P[0.1,1]
@@ -26,12 +26,12 @@ using SumSpaces, LazyArrays, LazyBandedMatrices, Test
 
 
     Ũ = ExtendedChebyshevU()
-    T̃ = ExtendedChebyshevU()
-    M = BlockBroadcastArray(hvcat, 2, unitblocks(U'T), unitblocks([Zeros(∞) W'U]),
+    T̃ = ExtendedChebyshevT()
+    M = BlockBroadcastArray(hvcat, 2, unitblocks(-(U'T)), unitblocks([Zeros(∞) W'U]),
                                       unitblocks(T[:,2:end]'V), unitblocks(U'T))
 
-    M_half = M[Block.(1:5), Block.(1:5)]*Δ_s[Block.(2:6), Block.(2:5)]
+    N = 10
+    M_half = M[Block.(1:N), Block.(1:N+1)]*Δ_s[Block.(2:N+2), Block.(2:N+1)]
 
-    M_half[Block(7,5)]
-    M_half[Block(5,7)]
+    R = cholesky(Symmetric(M_half)).U
 end
