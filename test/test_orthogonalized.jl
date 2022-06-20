@@ -1,4 +1,4 @@
-using SumSpaces, LazyArrays, LazyBandedMatrices, Test
+using SumSpaces, LazyArrays, LazyBandedMatrices, ClassicalOrthogonalPolynomials, FillArrays, Test
 
 @testset "orthogonalised" begin
     P = SumSpaceP()
@@ -31,7 +31,17 @@ using SumSpaces, LazyArrays, LazyBandedMatrices, Test
                                       unitblocks(T[:,2:end]'V), unitblocks(U'T))
 
     N = 10
-    M_half = M[Block.(1:N), Block.(1:N+1)]*Δ_s[Block.(2:N+2), Block.(2:N+1)]
+    M_half = M[Block.(1:N), Block.(1:N+1)]*Δ_s[Block.(2:N+2), Block.(2:N+1)]/π
 
     R = cholesky(Symmetric(M_half)).U
+
+    Δ_s[Block.(2:N+2), Block.(2:N+1)] * inv(R)
+
+
+    W'W
+    W'T[:,2:end]
+    M = BlockBroadcastArray(hvcat, 2, unitblocks(W'W), unitblocks(W'T[:,2:end]),
+                                      unitblocks(T[:,2:end]'W), unitblocks(W'W))
+
+    inv(R)'M[Block.(1:N),Block.(1:N)]*inv(R)
 end
