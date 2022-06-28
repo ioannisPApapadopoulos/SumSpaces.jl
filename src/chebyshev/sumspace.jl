@@ -121,7 +121,7 @@ function \(Sd::SumSpaceD, ASp::AppendedSumSpace)
 end
 
 # Derivative Sp -> Sd
-function *(D::Derivative, Sp::SumSpaceP)
+@simplify function *(D::Derivative, Sp::SumSpaceP)
     T = eltype(Sp)
     (a,b) = Sp.I
 
@@ -136,7 +136,7 @@ function *(D::Derivative, Sp::SumSpaceP)
 end
 
 # Hilbert: Sp -> Sp 
-function *(H::Hilbert, Sp::SumSpaceP)
+@simplify function *(H::Hilbert, Sp::SumSpaceP)
     T = eltype(Sp)
     onevec = mortar(Fill.(convert(T, π), Fill(2,∞)))
     zs = mortar(Zeros.(Fill(2,∞)))
