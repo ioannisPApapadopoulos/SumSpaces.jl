@@ -19,14 +19,7 @@ const SumSpaceD = SumSpace{2}
 
 axes(S::SumSpace) = (Inclusion(ℝ), _BlockedUnitRange(1:2:∞))
 
-function ==(a::SumSpace{kind}, b::SumSpace{kind}) where kind
-    if a.I == b.I 
-        return true
-    else
-        return false
-    end
-end
-
+==(a::SumSpace{kind}, b::SumSpace{kind}) where kind = a.I == b.I
 ==(a::SumSpace, b::SumSpace) = false
 
 function getindex(S::SumSpaceP{T}, x::Real, j::Int)::T where T
