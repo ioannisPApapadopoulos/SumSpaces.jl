@@ -16,12 +16,14 @@ include("chebyshev/extendedchebyshev.jl")
 include("chebyshev/sumspace.jl")
 include("chebyshev/element-sumspace.jl")
 include("jacobi/extendedjacobi.jl")
+include("frame.jl")
 
 export  ∞, oneto, Block, Derivative, Hilbert,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
         SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace, jacobimatrix,
         ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace,
-        ExtendedJacobi, ExtendedWeightedJacobi
+        ExtendedJacobi, ExtendedWeightedJacobi,
+        solvesvd, collocation_points, riemann, evaluate, framematrix
 
 
 # Affine transform to scale and shift polys. 
