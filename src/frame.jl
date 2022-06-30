@@ -1,11 +1,9 @@
 # Custom SVD solver for least squares problems
 function solvesvd(A::AbstractArray, b::AbstractVector; tol::Real=1e-7)
-    Am = A[1:end,1:end] # BlockBandedMatrices cannot do SVD
-    U,S,V = svd(Am)
-    S⁺ = inv.(S)[:]
-    S⁺[S⁺ .> 1/tol] .= 0
-    c = V * Diagonal(S⁺) * U' * b
-    return c
+    U,σ,V = svd(Matrix(A)) # BlockBandedMatrices cannot do SVD
+    filter!(>(tol), σ)
+    r = length(σ)
+    return V[:,1:r] * (inv.(σ) .* (U[:,1:r]' * b))
 end
 
 # Affine transformation
@@ -74,10 +72,8 @@ function framematrix(x::AbstractVector, Sp::ElementSumSpaceP, Nn::Int; normtype:
     Tp = eltype(Sp)
     el = length(Sp.I) - 1
     rows = [length(x)]; cols = vcat([1], Fill(el, (2*Nn+2)))
-
     # Create correct block structure
     A = BlockBandedMatrix(Zeros(sum(rows),sum(cols)), rows, cols, (sum(rows),sum(cols)))
-    
     # Form columns of Least Squares matrix.
     A[:,Block.(1:length(cols))] = normtype(x, x->Sp[x, Block.(1:length(cols))])
     return A
@@ -87,12 +83,9 @@ end
 function framematrix(x::AbstractVector, Sd::SumSpaceD, Nn::Int; normtype::Function=riemann)
     Tp = eltype(Sd)
     el = length(Sd.I) - 1
- 
     rows = [length(x)]; cols = vcat([1], Fill(2, el*(Nn+3)))
-  
     # Create correct block structure
     A = BlockBandedMatrix(Zeros(sum(rows),sum(cols)), rows, cols, (sum(rows),sum(cols)))
-    
     # Form columns of Least Squares matrix.
     A[:,Block.(1:length(cols))] = normtype(x, x->Sd[x, Block.(1:length(cols))])
     return A
@@ -104,7 +97,6 @@ function framematrix(x::AbstractVector, Sd::ElementSumSpaceD, Nn::Int; normtype:
     rows = [length(x)]; cols = vcat([1], Fill(el, (2*Nn+6)))
     # Create correct block structure
     A = BlockBandedMatrix(Zeros(sum(rows),sum(cols)), rows, cols, (sum(rows),sum(cols)))
-    
     # Form columns of Least Squares matrix.
     A[:,Block.(1:length(cols))] = normtype(x, x->Sd[x, Block.(1:length(cols))])
     return A
