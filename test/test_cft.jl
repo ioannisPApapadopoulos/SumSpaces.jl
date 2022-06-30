@@ -1,4 +1,4 @@
-using Test, SumSpaces
+using Test, SumSpaces, LinearAlgebra, FFTW, Interpolations
 
 @testset "cft" begin
 
