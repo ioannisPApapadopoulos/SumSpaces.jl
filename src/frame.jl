@@ -10,9 +10,9 @@ end
 at(a,b,x) = (b-a)/2 * x .+ (b+a)/2
 
 # Construct collocation points
-function collocation_points(M::Int, Me::Int; a::AbstractVector=[-1.,1.], endpoints::AbstractVector=[-5.,5.], innergap::Real = 0.)
-    Tp = eltype(a)
-    el_no = length(a)-1
+function collocation_points(M::Int, Me::Int; I::AbstractVector=[-1.,1.], endpoints::AbstractVector=[-5.,5.], innergap::Real = 0.)
+    Tp = eltype(I)
+    el_no = length(I)-1
 
     x = Array{Tp}(undef,el_no*M+2*Me)
     xnodes = LinRange{Tp}(innergap,1-innergap,M)
@@ -20,19 +20,19 @@ function collocation_points(M::Int, Me::Int; a::AbstractVector=[-1.,1.], endpoin
 
     xxnodes = LinRange{Tp}(-1+innergap,1-innergap,M)
     for el = 1:el_no
-        x[(el-1)*M+1:el*M] = at(a[el], a[el+1], xxnodes) 
+        x[(el-1)*M+1:el*M] = at(I[el], I[el+1], xxnodes) 
     end
     xnodes = LinRange{Tp}(innergap,1-innergap,Me)
     # chebnodes = sort(cos.(π.*xnodes))
 
     xxnodes = LinRange{Tp}(-1+innergap,1-innergap,Me)
-    x[el_no*M+1:el_no*M+Me] = at(endpoints[1], a[1], xxnodes) 
-    x[el_no*M+1+Me:el_no*M+2*Me] = at(a[end],endpoints[2],xxnodes)
+    x[el_no*M+1:el_no*M+Me] = at(endpoints[1], I[1], xxnodes) 
+    x[el_no*M+1+Me:el_no*M+2*Me] = at(I[end],endpoints[2],xxnodes)
     return sort(unique(x))
 end
 
 # Convert function evaluation to Riemann sum
-function riemann(x::AbstractVector, f::Function)
+function riemann(x::AbstractVector, f::Union{Function, Interpolations.GriddedInterpolation})
     y = sort(x)
     h = 0.5 .* (
             append!(y[2:end], y[end]) .- y
@@ -43,7 +43,7 @@ function riemann(x::AbstractVector, f::Function)
 end
 
 # Just function evaluation
-function evaluate(x::AbstractVector, f::Function)
+function evaluate(x::AbstractVector, f::Union{Function, Interpolations.GriddedInterpolation})
     y = sort(x)
     b = f(y)
     return b
