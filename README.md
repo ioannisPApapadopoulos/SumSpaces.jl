@@ -21,7 +21,7 @@ the first kind.
 
 ```julia
 julia> Sp = SumSpaceP() # Primal sum space
-SumSpace{1, Vector{Float64}, Float64}
+SumSpaceP{Float64, Vector{Float64}}
 
 julia> Sp[0.1,1:5] # first 5 functions
 5-element Vector{Float64}:
@@ -77,24 +77,21 @@ julia> Sd \ Sp
 # Expansion
 
 Finding the expansion of a function in the sum space is nontrivial.
-We utilize the framework of "frames". We first construct a Vandermonde
+We utilize the framework of "frames". We first construct a Gram
 matrix and then use a custom SVD solver to find the expansion.
 ```julia
 julia> Sp = SumSpaceP(); N = 2; # Truncation degree
-julia> M = max(N^2,5001);  # Number of collocation points in [-1,1]
-julia> Me = M ÷ 10;  # Number of collocation points in [-2,-1) and (1,2].
-julia> x = collocation_points(M, Me); # Collocation points
-julia> A = framematrix(x, Sp, N, M, Me); # Blocked frame matrix
-julia> solvesvd(A, evaluate(x, x->ExtendedChebyshevT()[x,2]))
-4-blocked 7-element BlockVector{Float64}:
-  9.71445146547012e-17  
- ───────────────────────
- -9.43689570931383e-16
-  0.9999999999999991
- ───────────────────────
-  8.326672684688674e-16
- -2.220446049250313e-16
- ───────────────────────
- -3.3306690738754696e-16
-  2.636779683484747e-16
+julia> M = 5001;  # Number of collocation points in [-1,1]
+julia> Me = M ÷ 10;  # Number of collocation points in [-5,-1) and (1,5].
+julia> x = collocation_points(M, Me, endpoints=[-5.,5]); # Collocation points
+julia> A = framematrix(x, Sp, N); # Blocked frame matrix
+julia> solvesvd(A, riemann(x, x->ExtendedChebyshevT()[x,2]))
+7-element Vector{Float64}:
+  1.1192393901633387e-16
+ -4.3388889260090994e-16
+  0.9999999999999982
+ -8.881784197001306e-16
+ -9.170833280340526e-16
+  4.374428354941292e-16
+ -4.718447854656949e-16
 ```
