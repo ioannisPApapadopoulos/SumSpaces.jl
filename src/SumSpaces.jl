@@ -18,6 +18,7 @@ include("chebyshev/element-sumspace.jl")
 include("jacobi/extendedjacobi.jl")
 include("frame.jl")
 include("cft/cft.jl")
+# include("cft/mathematica.jl")
 
 export  ∞, oneto, Block, Derivative, Hilbert,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
@@ -25,7 +26,8 @@ export  ∞, oneto, Block, Derivative, Hilbert,
         ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace,
         ExtendedJacobi, ExtendedWeightedJacobi,
         solvesvd, collocation_points, riemann, evaluate, framematrix,
-        supporter_functions, fft_supporter_functions, interpolate_supporter_functions, coefficient_supporter_functions, inverse_fourier_transform, fractional_heat_fourier_solve 
+        supporter_functions, fft_supporter_functions, interpolate_supporter_functions, coefficient_supporter_functions, inverse_fourier_transform, fractional_heat_fourier_solve,
+        fft_mathematica_supporter_functions, mathematica_correction 
 
 
 # Affine transform to scale and shift polys. 
