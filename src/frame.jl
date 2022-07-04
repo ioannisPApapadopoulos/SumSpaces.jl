@@ -32,7 +32,7 @@ function collocation_points(M::Int, Me::Int; I::AbstractVector=[-1.,1.], endpoin
 end
 
 # Convert function evaluation to Riemann sum
-function riemann(x::AbstractVector, f::Union{Function, Interpolations.GriddedInterpolation})
+function riemann(x::AbstractVector, f)
     y = sort(x)
     h = 0.5 .* (
             append!(y[2:end], y[end]) .- y
@@ -43,7 +43,7 @@ function riemann(x::AbstractVector, f::Union{Function, Interpolations.GriddedInt
 end
 
 # Just function evaluation
-function evaluate(x::AbstractVector, f::Union{Function, Interpolations.GriddedInterpolation})
+function evaluate(x::AbstractVector, f)
     y = sort(x)
     b = f(y)
     return b
@@ -57,7 +57,6 @@ function expansion_sum_space(c::AbstractVector, N::Int, el_no::Int)
 end
 
 # Construct Least Squares matrix for frame coefficient computation
-
 function framematrix(x::AbstractVector, Sp::SumSpaceP, Nn::Int; normtype::Function=riemann)
     Tp = eltype(Sp)
     el = length(Sp.I) - 1
