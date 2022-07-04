@@ -11,8 +11,8 @@ function supporter_functions(λ::Number, μ::Number, η::Number; W::Real=1000., 
         @warn "μ ≈ 0, λ < 0, and λ ∈ Sample, we slightly perturb λ to avoid NaNs in the FFT computation in supporter_functions in cft.jl"
     end
 
-    fmultiplier = k -> (λ .- im.*μ.*sign.(k) .+im.*η.*k .+ abs.(k))
-    hfmultiplier = k -> (- λ.*im.*sign.(k) .- μ .+ η.*abs.(k) .- im.*k)
+    fmultiplier = k -> (λ - im*μ*sign(k) + im*η*k + abs(k))
+    hfmultiplier = k -> (- λ*im*sign(k) - μ + η*abs(k) - im*k)
 
     # For certain values of λ, μ and η, fmultiplier can be equal to 0. This causes
     # NaNs in the ifft routine. To avoid this we watch if fmultiplier=0 and if it does
@@ -20,10 +20,10 @@ function supporter_functions(λ::Number, μ::Number, η::Number; W::Real=1000., 
     
     # FIXME: These list comprehensions are slow, can we speed it up? 
 
-    ## Define function F[wT0] / (λ - i*μ*sgn(k)+ iηk + abs.(k))
-    tFwT0 = (k,κ) -> pi * besselj.(0, abs.(k)) ./ fmultiplier(κ)
+    ## Define function F[wT0] / (λ - i*μ*sgn(k)+ iηk + abs(k))
+    tFwT0 = (k,κ) -> pi * besselj(0, abs(k)) / fmultiplier(κ)
     if λ ≈ 0
-        FwT0 = (k,κ) -> [fmultiplier(m) ≈ 0 ? (tFwT0(m-eps(),mm-eps())+tFwT0(m+eps(),mm+eps()))/2 : tFwT0(m,mm)  for (m,mm) in zip(k,κ)]
+        FwT0 = (k,κ) -> fmultiplier(k) ≈ 0 ? (tFwT0(k-eps(),κ-eps())+tFwT0(k+eps(),κ+eps()))/2 : tFwT0(k,κ)
     else
         FwT0 = (k,κ) -> tFwT0(k,κ)
     end
@@ -31,30 +31,30 @@ function supporter_functions(λ::Number, μ::Number, η::Number; W::Real=1000., 
     # If stabilise is false, then we compute the supporter functions associated with ̃U₀ and V₁ (U0 and wT1)
     # otherwise if it's true, then we compute the support functions asscoiated with ̃Uₙ₊₁ and Vₙ₊₂. 
 
-    ## Define function F[wT1] / (λ - i*μ*sgn(k)+ iηk + abs.(k))
+    ## Define function F[wT1] / (λ - i*μ*sgn(k)+ iηk + abs(k))
     if stabilise == false
-        tFwT1 = (k, κ) -> -im * pi * besselj.(1, k) ./ fmultiplier(κ)
+        tFwT1 = (k, κ) -> -im * pi * besselj(1, k) / fmultiplier(κ)
     else
-        tFwT1 = (k, κ) -> (-im).^(N+2) * pi * besselj.(N+2, k) ./ fmultiplier(κ)
+        tFwT1 = (k, κ) -> (-im)^(N+2) * pi * besselj(N+2, k) / fmultiplier(κ)
     end
     
     if λ ≈ 0
-        FwT1 = (k, κ) -> [fmultiplier(m) ≈ 0 ? (tFwT1(m-eps(),mm-eps())+tFwT1(m+eps(),mm+eps()))/2 : tFwT1(m,mm)  for (m,mm) in zip(k,κ)]
+        FwT1 = (k, κ) -> fmultiplier(k) ≈ 0 ? (tFwT1(k-eps(),κ-eps())+tFwT1(k+eps(),κ+eps()))/2 : tFwT1(k,κ)
     else
         FwT1 = (k,κ) -> tFwT1(k,κ)
     end
     
-    ## Define function F[U0] / (λ - i*μ*sgn(k)+ iηk + abs.(k))
+    ## Define function F[U0] / (λ - i*μ*sgn(k)+ iηk + abs(k))
     if stabilise == false
-        tFU0 = (k,κ) -> (pi * besselj.(1, abs.(k)) + 2 .*sin.(k)./k - 2 .* sin.(abs.(k)) ./ abs.(k)) ./ fmultiplier(κ)
+        tFU0 = (k,κ) -> (pi * besselj(1, abs(k)) + 2 *sin(k)/k - 2 * sin(abs(k)) / abs(k)) / fmultiplier(κ)
     else
-        tFU0 = (k,κ) -> ( (-im).^(N+2)*pi.*besselj.(N+2, k) ) ./ hfmultiplier(κ)
+        tFU0 = (k,κ) -> ( (-im)^(N+2)*pi*besselj(N+2, k) ) / hfmultiplier(κ)
     end
-    FU0 = (k,κ) -> [m ≈ 0 ? (tFU0(m-eps(),mm-eps())+tFU0(m+eps(),mm+eps()))/2 : tFU0(m,mm)  for (m,mm) in zip(k,κ)]
+    FU0 = (k,κ) -> k ≈ 0 ? (tFU0(k-eps(),κ-eps())+tFU0(k+eps(),κ+eps()))/2 : tFU0(k,κ)
     
-    ## Define function F[U-1] / (λ - i*μ*sgn(k)+ iηk + abs.(k))
-    tFU_1 = (k,κ) -> ( im*pi*k.*besselj.(0,abs.(k)) ./ abs.(k)) ./ fmultiplier(κ)
-    FU_1 = (k,κ) -> [m ≈ 0 ? (tFU_1(m-eps(),mm-eps())+tFU_1(m+eps(),mm+eps()))/2 : tFU_1(m,mm)  for (m,mm) in zip(k,κ)]
+    ## Define function F[U-1] / (λ - i*μ*sgn(k)+ iηk + abs(k))
+    tFU_1 = (k,κ) -> ( im*pi*k*besselj(0,abs(k)) / abs(k)) / fmultiplier(κ)
+    FU_1 = (k,κ) -> k ≈ 0 ? (tFU_1(k-eps(),κ-eps())+tFU_1(k+eps(),κ+eps()))/2 : tFU_1(k,κ)
     
     ## Different element supporter functions on the same sized elements are simply translations
     ## of the supporter functions on a reference element s*[-1,1] where s is the scaling.
@@ -68,10 +68,10 @@ function supporter_functions(λ::Number, μ::Number, η::Number; W::Real=1000., 
     # Compute reference supporter functions
     ywT0 = []; ywT1 = []; yU0 = []; yU_1 = []
     for ss in s
-        sFwT0 = k -> (1/ss).*FwT0((1/ss) .*k, k)
-        sFwT1 = k -> (1/ss).*FwT1((1/ss) .*k, k)
-        sFU0 = k -> (1/ss).*FU0((1/ss) .*k, k)
-        sFU_1 = k -> (1/ss).*FU_1((1/ss) .*k, k)
+        sFwT0 = k -> (1/ss)*FwT0((1/ss)*k, k)
+        sFwT1 = k -> (1/ss)*FwT1((1/ss)*k, k)
+        sFU0 = k -> (1/ss)*FU0((1/ss)*k, k)
+        sFU_1 = k -> (1/ss)*FU_1((1/ss)*k, k)
         append!(ywT0, [cifft(sFwT0, ω, δ, W, x)])
         append!(ywT1, [cifft(sFwT1, ω, δ, W, x)])
         append!(yU0, [cifft(sFU0, ω, δ, W, x)])
@@ -84,10 +84,9 @@ end
 # FFT approximation of the inverse Fourier Transforms
 # This approximates (1/2π) ∫ f(ω)exp(i ω x) dω. 
 function cifft(f::Function, ω::AbstractVector, δ::Real, W::Real, x::AbstractVector)
-    yf= ifftshift(ifft(f(ω)))
+    yf= ifftshift(ifft(f.(ω)))
     N = length(ω)
-    yf = (δ .* N .* exp.(-im .*x .*W)  ./ (2*pi)) .* yf
-    return yf
+    return (δ .* N .* exp.(-im .*x .*W)  ./ (2*pi)) .* yf
 end
 
 # This takes in the discrete values computed by support_functions and interpolates them so that we 
@@ -99,7 +98,7 @@ function interpolate_supporter_functions(x1::AbstractVector, x2::AbstractVector,
     ## for each element. 
     (ywT0, yU_1, ywT1, yU0) = uS
     el_no = length(I)-1
-    c = 2. ./ (I[2:end] - I[1:end-1]); d =  (I[1:end-1] + I[2:end]) ./ 2
+    c = 2. ./ (I[2:end] - I[1:end-1]); d = (I[1:end-1] + I[2:end]) ./ 2
 
 
     yU_1 = [interpolate((x1 .+ d[j],), real.(yU_1[findall(x->x==c[j],s)[1]])[:], Gridded(Linear())) for j in 1:el_no]
@@ -155,8 +154,6 @@ function inverse_fourier_transform(F::Function, ω::AbstractVector)
     x = ifftshift(fftfreq(length(ω), 1/δ) * 2 * pi)
     N = length(ω)
 
-    f = ifftshift(ifft(F(ω)))
-    f = (δ .* N .* exp.(-im .*x .*W)  ./ (2*pi)) .* f
-
-    return (x, f)
+    f = ifftshift(ifft(F.(ω)))
+    return (x, (δ .* N .* exp.(-im .*x .*W)  ./ (2*pi)) .* f)
 end

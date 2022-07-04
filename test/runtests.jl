@@ -1,5 +1,4 @@
-using Test, ClassicalOrthogonalPolynomials
-using SumSpaces
+using Test, SumSpaces
 import ClassicalOrthogonalPolynomials: sqrtx2
 
 include("test_extendedchebyshev.jl")
