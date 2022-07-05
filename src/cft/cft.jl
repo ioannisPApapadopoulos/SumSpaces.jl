@@ -128,7 +128,6 @@ function fft_supporter_functions(λ::Number, μ::Number, η::Number; W::Real=100
         half_laplace_U0 = x -> ExtendedWeightedChebyshevU()[x,1]
         
         for els = 1 : length(I)-1
-            # We broadcast to be consistent with the Interpolations in the non-special case.
             append!(ywT0, [x->half_laplace_wT0(affinetransform(I[els], I[els+1], x))])
             append!(ywT1, [x->half_laplace_wT1(affinetransform(I[els], I[els+1], x))])
             append!(yU0, [x->half_laplace_U0(affinetransform(I[els], I[els+1], x))])

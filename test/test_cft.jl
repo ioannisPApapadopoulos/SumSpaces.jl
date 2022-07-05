@@ -1,4 +1,5 @@
 using Test, SumSpaces, LinearAlgebra, FFTW, Interpolations
+import SumSpaces: affinetransform
 
 @testset "cft" begin
 
