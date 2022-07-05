@@ -6,8 +6,8 @@ using Test, SumSpaces
 
         @test eSp.I ≈ [-1,1]
 
-        a = [-5,3.]
-        eSpa = ElementSumSpaceP(a)
+        I = [-5,3.]
+        eSpa = ElementSumSpaceP(I)
         @test eSpa.I ≈ [-5,3]
 
         b = [-5,3.,5]
@@ -19,7 +19,7 @@ using Test, SumSpaces
         eSd = ElementSumSpaceD()
         @test eSd.I ≈ [-1,1]
 
-        eSda = ElementSumSpaceD(a)
+        eSda = ElementSumSpaceD(I)
         @test eSda.I ≈ [-5,3]
 
         b = [-5,3.,5]
@@ -34,8 +34,8 @@ using Test, SumSpaces
     
     @testset "Evaluation" begin 
         @testset "primal" begin
-            a = [-3.,-1, 1, 3]
-            eSp = ElementSumSpaceP(a)
+            I = [-3.,-1, 1, 3]
+            eSp = ElementSumSpaceP(I)
 
             a1 = [-3,-1.]
             a2 = [-1.,1]
@@ -55,8 +55,8 @@ using Test, SumSpaces
         end
 
         @testset "dual" begin
-            a = [-3.,-1, 1, 3]
-            eSd = ElementSumSpaceD(a)
+            I = [-3.,-1, 1, 3]
+            eSd = ElementSumSpaceD(I)
 
             a1 = [-3,-1.]
             a2 = [-1.,1]
@@ -76,11 +76,11 @@ using Test, SumSpaces
         end
 
         @testset "appended" begin
-            a = [-3.,-1, 1, 3]
+            I = [-3.,-1, 1, 3]
             f = x -> x
             uS = ([f,f,f],[f,f,f],[f,f,f],[f,f,f])
-            ASp = ElementAppendedSumSpace(uS, [], a)
-            Sp = ElementSumSpaceP(a)
+            ASp = ElementAppendedSumSpace(uS, [], I)
+            Sp = ElementSumSpaceP(I)
 
             @test ASp[0.1,oneto(0)] == Float64[]
             @test ASp[0.1,oneto(1)] ≈ Sp[0.1,oneto(1)]
@@ -94,12 +94,12 @@ using Test, SumSpaces
     end
 
     @testset "BlockStructure" begin
-        a = [-3.,-1, 1, 3]
-        Sp = ElementSumSpaceP(a)
-        Sd = ElementSumSpaceD(a)
+        I = [-3.,-1, 1, 3]
+        Sp = ElementSumSpaceP(I)
+        Sd = ElementSumSpaceD(I)
         f = x -> x
         uS = ([f,f,f],[f,f,f],[f,f,f],[f,f,f])
-        ASp = ElementAppendedSumSpace(uS, [], a)
+        ASp = ElementAppendedSumSpace(uS, [], I)
 
 
         @test axes(Sp[0.1, Block.(1:3)]) == (1:1:7,)
@@ -111,9 +111,9 @@ using Test, SumSpaces
     end
 
     @testset "Identity maps" begin
-        a = [-5.,-1, 1, 2]
-        eSp = ElementSumSpaceP(a)
-        eSd = ElementSumSpaceD(a)
+        I = [-5.,-1, 1, 2]
+        eSp = ElementSumSpaceP(I)
+        eSd = ElementSumSpaceD(I)
         Sp = SumSpaceP()
         Sd = SumSpaceD()
 
@@ -131,13 +131,13 @@ using Test, SumSpaces
     end
 
     @testset "derivative" begin
-        a = [-5.,-1, 1, 2] 
-        Sp = ElementSumSpaceP(a)
+        I = [-5.,-1, 1, 2] 
+        Sp = ElementSumSpaceP(I)
         
         x = axes(Sp, 1)
         A_Sd = Derivative(x)*Sp
 
-        Sd = ElementSumSpaceD(a)
+        Sd = ElementSumSpaceD(I)
 
         A = [Sd \ A_Sd[j] for j = 1:3]
         @test axes(A[1]) == (1:1:∞, 1:1:∞)
@@ -145,18 +145,18 @@ using Test, SumSpaces
             @test A[j][1,1] ≈ 0
             @test A[j][2,1] ≈ 0
             @test A[j][2:3,2:3] ≈ [[0,0] [0,0]]
-            @test A[j][4:5,2:3] ≈ [[-2/(a[j+1]-a[j]),0] [0,2/(a[j+1]-a[j])]]
+            @test A[j][4:5,2:3] ≈ [[-2/(I[j+1]-I[j]),0] [0,2/(I[j+1]-I[j])]]
             @test A[j][Block.(2), Block.(2)] == A[j][2:3,2:3]
             for N = 3:20
-                @test A[j][Block.(N), Block.(N-1)] == [[-2/(a[j+1]-a[j])*(N-2),0] [0,2/(a[j+1]-a[j])*(N-2)]]
+                @test A[j][Block.(N), Block.(N-1)] == [[-2/(I[j+1]-I[j])*(N-2),0] [0,2/(I[j+1]-I[j])*(N-2)]]
             end
         end
     end
 
     @testset "hilbert" begin
-        a = [-5.,-1, 1, 2]
-        eSp = ElementSumSpaceP(a)
-        eSd = ElementSumSpaceD(a)
+        I = [-5.,-1, 1, 2]
+        eSp = ElementSumSpaceP(I)
+        eSd = ElementSumSpaceD(I)
         Sp = SumSpaceP()
         Sd = SumSpaceD()
 
@@ -177,19 +177,19 @@ using Test, SumSpaces
     end
 
     @testset "appended-identity" begin
-        a = [-5.,-1, 1, 2]
+        I = [-5.,-1, 1, 2]
         f = x -> x
         uS = ([f,f,f],[f,f,f],[f,f,f],[f,f,f])
         cuS = [[[1.],[1.],[1.]], [[2.],[2.],[2.]], [[3.],[3.],[3.]], [[4.],[4.],[4.]]]
         
-        ASp = ElementAppendedSumSpace(uS, cuS, a)
-        Sp = ElementSumSpaceP(a)
-        Sd = ElementSumSpaceD(a)
+        ASp = ElementAppendedSumSpace(uS, cuS, I)
+        Sp = ElementSumSpaceP(I)
+        Sd = ElementSumSpaceD(I)
 
         A = Sd \ ASp
         B = Sd \ Sp
 
-        el_no = length(a)-1
+        el_no = length(I)-1
 
         @test A[1,1] ≈ -1
         @test A[3el_no+2, 1] ≈ 1 
@@ -199,6 +199,36 @@ using Test, SumSpaces
         end
         @test A[2:4,Block.(6)] ≈ [[0.5,0,0] [0,0.5,0] [0,0,0.5]]
         @test A[3el_no+5:3el_no+7,Block.(6)] ≈ -[[0.5,0,0] [0,0.5,0] [0,0,0.5]]
+    
+        ASp = ElementAppendedSumSpace(uS, cuS)
+        @test ASp.I ≈ [-1,1]
+    end
+
+    @testset "coefficient_stack" begin
+        K = 2; N = 1
+        v = Array(1:1+K*(2N+6))
+        v = BlockArray(v, vcat(1,Fill(K,(length(v)-1)÷K)))
+        w = coefficient_stack(v, N, K)
+        @test w[1] == v[1]
+        @test w[2:length(w)÷2+1] == v[2:2:end]
+        @test w[length(w)÷2+2:end] == v[3:2:end]
+    end
+
+    @testset "coefficient_interlace" begin
+        K = 2; N = 1
+        v = Array(1:1+K*(2N+6))
+        w = coefficient_interlace(v, N, K)
+
+        @test length(w.blocks) == 9
+        @test length(w.blocks[1]) == 1
+        for j = 2:9
+            @test length(w.blocks[j]) == 2
+        end
+        
+        @test w[1] == v[1]
+        for j in 2:9
+            w[Block.(j)] = v[j:(2N+6):end] 
+        end
     end
 
 end

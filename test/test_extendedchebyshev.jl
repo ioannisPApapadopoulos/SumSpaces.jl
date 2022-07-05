@@ -13,6 +13,10 @@ import ClassicalOrthogonalPolynomials: sqrtx2
     @testset "Evaluation" begin
         @testset "wU" begin
             wU = ExtendedWeightedChebyshevU()
+
+            @test (wU == ExtendedWeightedChebyshevU()) == true
+            @test (wU == ExtendedWeightedChebyshevT()) == false
+
             @test @inferred(wU[0.1,oneto(0)]) == Float64[]
             @test @inferred(wU[0.1,oneto(1)]) ≈ [sqrt(1-0.1^2)]
             @test @inferred(wU[0.1,oneto(2)]) ≈ [sqrt(1-0.1^2),2*0.1*sqrt(1-0.1^2)]
@@ -27,6 +31,10 @@ import ClassicalOrthogonalPolynomials: sqrtx2
 
         @testset "wT" begin
             wT = ExtendedWeightedChebyshevT()
+            
+            @test (wT == ExtendedWeightedChebyshevT()) == true
+            @test (wT == ExtendedWeightedChebyshevU()) == false
+
             @test @inferred(wT[0.1,oneto(0)]) == Float64[]
             @test @inferred(wT[0.1,oneto(1)]) ≈ [1/sqrt(1-0.1^2)]
             @test @inferred(wT[0.1,oneto(2)]) ≈ [1/sqrt(1-0.1^2),0.1/sqrt(1-0.1^2)]
@@ -44,6 +52,9 @@ import ClassicalOrthogonalPolynomials: sqrtx2
             eT = ExtendedChebyshevT()
             T = ChebyshevT()
 
+            @test (eT == ExtendedChebyshevT()) == true
+            @test (eT == ExtendedChebyshevU()) == false
+
             @test @inferred(eT[0.1,oneto(0)]) == Float64[]
             @test @inferred(eT[0.1,oneto(1)]) ≈ T[0.1,oneto(1)]
             @test @inferred(eT[0.1,oneto(2)]) ≈ T[0.1,oneto(2)]
@@ -60,6 +71,10 @@ import ClassicalOrthogonalPolynomials: sqrtx2
         @testset "eU" begin
             eU = ExtendedChebyshevU()
             U = ChebyshevU()
+
+            @test (eU == ExtendedChebyshevU()) == true
+            @test (eU == ExtendedChebyshevT()) == false
+
             @test @inferred(eU[0.1,oneto(0)]) == Float64[]
             @test @inferred(eU[0.1,3:3]) ≈ U[0.1,oneto(1)]
             @test @inferred(eU[0.1,3:4]) ≈ U[0.1,oneto(2)]
@@ -104,6 +119,6 @@ import ClassicalOrthogonalPolynomials: sqrtx2
         @test (T̃'Ṽ)[1:10,1:10] == (Ṽ'T̃)[1:10,1:10] == (T̃'V)[1:10,1:10] ==
                 (V'T̃)[1:10,1:10] == (T'Ṽ)[1:10,1:10] == (Ṽ'T)[1:10,1:10]
 
-        # T̃'Ũ # FIXME: This is not working yet in Julia 1.6
+        T̃'Ũ
     end
 end
