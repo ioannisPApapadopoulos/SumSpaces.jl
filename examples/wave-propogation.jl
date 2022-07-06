@@ -10,7 +10,7 @@ This script implements the "Wave propagation" example found in
 
 We want to solve 
 
-((-Δ)^1/2 + H - ∂ₜₜ) u(x,t) = W₄(x)exp(-t²), u(x,t) → 0 as |x| → ∞.
+((-Δ)^1/2 + H + ∂ₜₜ) u(x,t) = W₄(x)exp(-t²), u(x,t) → 0 as |x| → ∞.
 
 We first approximate the frequency-space solutions for a variety of wavelengths and then compute an IFT to 
 obtain the physical-space solution. 
