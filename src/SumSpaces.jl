@@ -19,7 +19,7 @@ include("jacobi/extendedjacobi.jl")
 include("frame.jl")
 include("cft/cft.jl")
 
-export  ∞, oneto, Block, Derivative, Hilbert, BlockArray,
+export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
         SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace, jacobimatrix,
         ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace, coefficient_interlace, coefficient_stack,

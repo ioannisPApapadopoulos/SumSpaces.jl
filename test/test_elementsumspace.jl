@@ -1,5 +1,4 @@
 using Test, SumSpaces
-import SumSpaces: Fill
 
 @testset "element-sumspace" begin
     @testset "basics" begin
