@@ -22,6 +22,7 @@ We measure the inf-norm error with increasing n and plot the (spectral) converge
 
 """
 
+# To contain the inf-norm errors at each time-step
 errors = []
 
 # To compute the first case, simply set μ=0 and η=0.

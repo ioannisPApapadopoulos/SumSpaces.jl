@@ -24,7 +24,7 @@ export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill,
         SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace, jacobimatrix,
         ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace, coefficient_interlace, coefficient_stack,
         ExtendedJacobi, ExtendedWeightedJacobi,
-        solvesvd, collocation_points, riemann, evaluate, framematrix,
+        solvesvd, collocation_points, riemann, evaluate, framematrix, riemannf,
         supporter_functions, fft_supporter_functions, interpolate_supporter_functions, coefficient_supporter_functions, inverse_fourier_transform, load_supporter_functions, save_supporter_functions
 
 
