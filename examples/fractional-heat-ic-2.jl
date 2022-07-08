@@ -1,4 +1,4 @@
-using SumSpaces
+using SumSpaces, FFTW, SpecialFunctions
 import LinearAlgebra: I, norm
 using LaTeXStrings, Plots
 
@@ -40,9 +40,9 @@ xc = collocation_points(M, Me, I=intervals, endpoints=[-20.,20]) # Collocation p
 A = framematrix(xc, eSp, N, normtype=evaluate) # Blocked frame matrix
 
 # Compute support functions
-uS = fft_supporter_functions(λ, μ, η, I=intervals, W=1e4, δ=1e-2); # Actual functions
+@time uS = fft_supporter_functions(λ, μ, η, I=intervals, W=1e4, δ=1e-2); # Actual functions
 # Element primal sum space coefficients
-cuS = coefficient_supporter_functions(A, xc, uS, 2N+3, normtype=evaluate) 
+@time cuS = coefficient_supporter_functions(A, xc, uS, 2N+3, normtype=evaluate) 
 
 # Create appended sum space
 ASp = ElementAppendedSumSpace(uS, cuS, intervals)
@@ -70,17 +70,15 @@ for j in 1:K
     end
 end
 
-u0 = x -> 1. / ((x^2 + 1) )
-A = framematrix(xc, eSp, N, normtype=riemann)
-u₀ =  Matrix(A) \ riemannf(xc, u0) 
-
-# Add zero coefficients corresponding to support functions
-u₀ = [u₀[1]' zeros(K*4)' u₀[2:end]']' 
+# Can represent the nitial condition, W₀(x) = (1-x²)₊^1/2 exactly.
+u₀ = zeros(1+K*(2N+6))
+u₀ = BlockArray(u₀, vcat(1,Fill(K,(length(u₀)-1)÷K)))
+u₀[Block.(6)][3] = 1.
 u = [u₀]
 
 # Run solve loop for time-stepping
 timesteps=100
-for k = 1:timesteps
+@time for k = 1:timesteps
     u1 = []
     
     # Map from ASp to Sd
@@ -106,36 +104,57 @@ for k = 1:timesteps
     append!(u,  [u1])
 end
 
+###
+# Approximating the solution via a Fourier approach
+###
+function fractional_heat_fourier_solve(ω, timesteps)
+    
+    F = (k, n) -> k ≈ 0. ? ComplexF64(pi/2) : 
+        ComplexF64(pi * besselj(1, abs(k)) / (abs(k) * (1 + Δt * abs(k))^n))
+    x = ifftshift(fftfreq(length(ω), 1/δ) * 2 * pi)
 
-# Plot solution and collect errors
+    fv = [ExtendedWeightedChebyshevU()[x, 1]]
+    for n = 1:timesteps+1
+        Fn = k -> F(k, n)
+        f = inverse_fourier_transform(Fn, ω, x)
+        append!(fv, [real.(f)])
+        print("Computed timestep: $n. \n")
+    end
+    return (x, fv)
+end
+
+Δt = 1e-2
+W=1e3; δ=1e-3
+ω=range(-W, W, step=δ); ω = ω[1:end-1]
+@time (fx, fv) = fractional_heat_fourier_solve(ω, timesteps)
+
+# Plot solution and collect norm difference with Fourier-based solution
 p = plot() 
-xx = -20:0.01:20
+xx = fx[-20 .< fx .< 20]
 xlim = [xx[1],xx[end]]; ylim = [-0.02,1]
-y = (x,t) -> (1 + t) / ((x^2 + (1+t)^2))
-d = (x,t,u) -> abs.(y.(x,t) .- ASp[x,1:length(u)]*u)
 errors = []
-
 for k = 1:timesteps+1
     t = Δt*(k-1)
     
     tdisplay = round(t, digits=2)
-    yy = ASp[xx,1:length(u[k])]*u[k]
+    yy = ASp[xx, 1:length(u[k])]*u[k]
     
-    dx = x->d(x,t,u[k])
-    append!(errors, norm(dx(xx), Inf))
-
-    # p = plot(xx,yy, title="time=$tdisplay (s)", label="Fractional heat equation", legend=:topleft, xlim=xlim, ylim=ylim)
-    # p = plot!(xx, y.(xx, t), label="True solution", legend=:topleft, xlim=xlim, ylim=ylim)
-    # display(p)
+    append!(errors, norm((fv[k][-20 .< fx .< 20])-yy, Inf))
+    # p = plot(xx, yy, title="time=$tdisplay (s)", label="Spectral method", legend=:topleft, xlim=xlim, ylim=ylim)
+    # p = plot!(xx, fv[k][-20 .< fx .< 20], label="Fourier", legend=:topleft, xlim=xlim, ylim=ylim)
+    # display(  p)
 end
 
+###
+# Plot inf-norm difference with Fourier solution at each timestep
+###
 plot(1:length(errors), errors, legend=:none, 
     title="Error",
     markers=:circle,
     xlabel=L"$k$",
     xtickfontsize=12, ytickfontsize=12,xlabelfontsize=15,ylabelfontsize=15,
     ylabel=L"$\Vert u(x,k\Delta t)-\mathbf{S}^{\mathbf{I},\!\!\!\!+}_5\!\!\!\!\!(x) \mathbf{u}_k)\Vert_\infty$")
-# savefig("errors-infty.pdf")
+# savefig("errors-infty-W0.pdf")
  
 xx = -10:0.01:10
 xlim = [xx[1],xx[end]]; ylim = [-0.02, 1]
@@ -155,14 +174,17 @@ for k = [1,51,101]
 
     display(p)
 end  
-# savefig(p, "ic1.pdf")
+# savefig(p, "ic2.pdf")
 
-
-p = plot(spy(Dm[1], markersize=4,color=:darktest), 
-        xtickfontsize=12, ytickfontsize=12,xlabelfontsize=15,ylabelfontsize=15,
-        title= L"$\mathrm{Spy \ plot \ of} \ \lambda E + A^{I_1} \; (n=5)$")
-# savefig(p, "spy-1.pdf")
-p = plot(spy(Dm[2], markersize=4,color=:darktest), 
-        xtickfontsize=12, ytickfontsize=12,xlabelfontsize=15,ylabelfontsize=15,
-        title= L"$\mathrm{Spy \ plot \ of} \ \lambda E + A^{I_k}, k \geq 2 \; (n=5)$")
-# savefig(p, "spy-2.pdf")
+###
+# Plot contour plot of solution
+###
+uaa(x,t) = ASp[x,1:length(u[1])]'*u[Int64(round(t/Δt))][1:end] 
+x = -3:0.01:3; t = 0.01:0.01:1.01;
+X = repeat(reshape(x, 1, :), length(t), 1)
+T = repeat(t, 1, length(x))
+Z = map(uaa, X, T)
+p = contour(x,t,Z,fill=true, rev=true,
+        xlabel=L"$x$",ylabel=L"$t$",
+        xtickfontsize=8, ytickfontsize=8,xlabelfontsize=15,ylabelfontsize=15)
+# savefig(p, "W0-frac-heat-contour.pdf")

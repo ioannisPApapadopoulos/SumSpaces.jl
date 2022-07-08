@@ -158,14 +158,13 @@ end
 
 # FFT approximation of the inverse Fourier Transforms
 # This approximates (1/2π) ∫ f(ω)exp(i ω x) dω. 
-function inverse_fourier_transform(F::Function, ω::AbstractVector)
+function inverse_fourier_transform(F::Function, ω::AbstractVector, x::AbstractVector)
     
     δ = step(ω); W = abs(ω[1])
-    x = ifftshift(fftfreq(length(ω), 1/δ) * 2 * pi)
     N = length(ω)
 
     f = ifftshift(ifft(F.(ω)))
-    return (x, (δ .* N .* exp.(-im .*x .*W)  ./ (2*pi)) .* f)
+    return (δ .* N .* exp.(-im .*x .*W)  ./ (2*pi)) .* f
 end
 
 # Save support functions

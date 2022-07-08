@@ -169,10 +169,11 @@ savefig("wave-propogation-hilbert-contour-py.pdf")
 
 yylist_ifft = []
 ω = -1000:0.01:1000; ω = ω[1:end-1]
+t = ifftshift(fftfreq(length(ω), 1/δ) * 2 * pi)
 for step in 1:length(xx)
     Fu = extrapolate(interpolate((sqrt.(ω2),), yylist[:,step], Gridded(Linear())), 0)
     FFu = ω -> Fu(abs.(ω))
-    (t, u) = inverse_fourier_transform(FFu, ω)
+    u = inverse_fourier_transform(FFu, ω, t)
     append!(yylist_ifft, [u])
 end
 
