@@ -107,7 +107,7 @@ K = length(intervals)-1
 # uS = load_supporter_functions(filepath, intervals);
 
 # Comment this out if support functions already computed
-# uS = fft_mathematica_supporter_functions(λ, μ, η, I=intervals, N=N, W=1e4, δ=1e-2, stabilise=true, maxrecursion=100)
+uS = fft_mathematica_supporter_functions(λ, μ, η, I=intervals, N=N, W=1e4, δ=1e-2, stabilise=true, maxrecursion=100)
 
 # Element primal sum space coefficients
 M = max(N^2,6001)
