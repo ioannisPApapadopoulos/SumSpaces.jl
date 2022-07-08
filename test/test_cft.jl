@@ -196,8 +196,8 @@ import SumSpaces: affinetransform
 
         f = x -> sqrt(π).*exp.(-x.^2 ./ 4)
         W = 1e3; δ = 1e-3; ω=range(-W, W, step=δ); ω = ω[1:end-1]
-
-        (x, IFT_f) = inverse_fourier_transform(f, ω)
+        x = ifftshift(fftfreq(length(ω), 1/δ) * 2 * pi)
+        IFT_f = inverse_fourier_transform(f, ω, x)
         @test isapprox(imag.(IFT_f), zeros(length(IFT_f)), atol=1e-12)
         @test isapprox(real.(IFT_f), exp.(-x.^2), atol=1e-13)
     end
