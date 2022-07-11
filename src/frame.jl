@@ -38,15 +38,22 @@ function riemann(x::AbstractVector, f)
             append!(y[2:end], y[end]) .- y
          .+ y .- append!([y[1]], y[1:end-1])
     )
-    b = sqrt.(h).*f(y)
-    return b
+    return sqrt.(h).*f(y)
 end
 
 # Just function evaluation
 function evaluate(x::AbstractVector, f)
     y = sort(x)
-    b = f(y)
-    return b
+    return f(y)
+end
+
+function riemannf(x::AbstractVector, f)
+    y = sort(x)
+    h = 0.5 .* (
+            append!(y[2:end], y[end]) .- y
+         .+ y .- append!([y[1]], y[1:end-1])
+    )
+    return sqrt.(h).*f.(y)
 end
 
 # Fit low order expansion to higher order expansion

@@ -42,12 +42,6 @@ end
 
 computes the `n`-th extended chebyshev T at `z`.
 """
-extendedchebyshevt(n::Integer, z::Number) = Base.unsafe_getindex(ExtendedChebyshevT{typeof(z)}(), z, n+1)
-
-# hilbertweightedchebyshevu() = HilbertWeightedChebyshevU()
-# hilbertweightedchebyshevu(d::AbstractInterval{T}) where T = HilbertWeightedChebyshevU{float(T)}()[affine(d, ChebyshevInterval{T}()), :]
-# hilbertweightedchebyshevu(d::Inclusion) = hilbertweightedchebyshevu(d.domain)
-# hilberweightedchebyshevu(S::AbstractQuasiMatrix) = hilberweightedchebyshevu(axes(S,1))
 
 #### 
 # Extended Chebyshev U

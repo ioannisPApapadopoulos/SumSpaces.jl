@@ -108,8 +108,8 @@ end
 # Helper functions
 ###
 
-function coefficient_interlace(c, N, el_no; appended=false)
-    cskip = appended==true ? 2N+6 : 2N+2
+function coefficient_interlace(c, N, el_no)
+    cskip = 2N+6
     v = zeros(length(c))
     v = BlockArray(v, vcat(1,Fill(el_no,(length(v)-1)÷el_no)))
     v[1] = c[1]
@@ -119,8 +119,8 @@ function coefficient_interlace(c, N, el_no; appended=false)
     return v
 end
 
-function coefficient_stack(c, N, el_no; appended=false)
-    cskip = appended==true ? 2N+6 : 2N+2
+function coefficient_stack(c, N, el_no)
+    cskip = 2N+6
     v = zeros(length(c))
     v = BlockArray(v, vcat(cskip+1,Fill(cskip,el_no-1)))
     v[1] = c[1]
@@ -189,7 +189,7 @@ function \(Sd::ElementSumSpaceD, ASp::ElementAppendedSumSpace)
     el_no = length(ASp.I)-1
 
     # FIXME: Temporary hack in finite-dimensional indexing
-    N = Int64(1e2)
+    N = Int64(5e2)
     # Bm = (Sd \ ElementSumSpaceP{Vector{T},T}(ASp.I))[1:2N+7,1:2N+3] 
     zs = Zeros(∞,4*el_no) 
     A = []

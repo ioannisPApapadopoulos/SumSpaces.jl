@@ -112,10 +112,21 @@ end
 function fft_supporter_functions(λ::Number, μ::Number, η::Number; W::Real=1000., δ::Real=0.001, 
     I::AbstractVector=[-1.,1.], N::Int=5, stabilise::Bool=false)
     
+    s = unique(2. ./ (I[2:end] - I[1:end-1]))
     
     # Special case analytical expressions
     if λ == μ == η ≈ 0
+
+        if s != [1.0]
+            return error("λ == μ == η ≈ 0, currently can only handle translations of the reference interval [-1,1].")
+        end
         ywT0 = []; ywT1 = []; yU0 = []; yU_1 = []
+        
+        half_laplace_wT0 = x -> abs(x) <= 1 ? log(2)-Base.MathConstants.eulergamma : log(2)-Base.MathConstants.eulergamma-asinh(sqrt(x^2-1))
+        half_laplace_wT1 = x -> ExtendedChebyshevT()[x,2]
+        half_laplace_U_1 = x -> abs(x) <= 1 ? -asin(x) : -sign(x)*pi/2
+        half_laplace_U0 = x -> ExtendedWeightedChebyshevU()[x,1]
+        
         for els = 1 : length(I)-1
             append!(ywT0, [x->half_laplace_wT0(affinetransform(I[els], I[els+1], x))])
             append!(ywT1, [x->half_laplace_wT1(affinetransform(I[els], I[els+1], x))])
@@ -125,7 +136,6 @@ function fft_supporter_functions(λ::Number, μ::Number, η::Number; W::Real=100
         return (ywT0, yU_1, ywT1, yU0)
     end 
     
-    s = unique(2. ./ (I[2:end] - I[1:end-1]))
     (x, uS) = supporter_functions(λ, μ, η, W=W, δ=δ, s=s, N=N, stabilise=stabilise)
     return interpolate_supporter_functions(x, x, uS, I, s)
 end
@@ -148,12 +158,39 @@ end
 
 # FFT approximation of the inverse Fourier Transforms
 # This approximates (1/2π) ∫ f(ω)exp(i ω x) dω. 
-function inverse_fourier_transform(F::Function, ω::AbstractVector)
+function inverse_fourier_transform(F::Function, ω::AbstractVector, x::AbstractVector)
     
     δ = step(ω); W = abs(ω[1])
-    x = ifftshift(fftfreq(length(ω), 1/δ) * 2 * pi)
     N = length(ω)
 
     f = ifftshift(ifft(F.(ω)))
-    return (x, (δ .* N .* exp.(-im .*x .*W)  ./ (2*pi)) .* f)
+    return (δ .* N .* exp.(-im .*x .*W)  ./ (2*pi)) .* f
+end
+
+# Save support functions
+function save_supporter_functions(filepath, x1, x2, uS)
+    (ywT0, yU_1, ywT1, yU0) = uS
+    writedlm(filepath, [x1, x2, real.(ywT0[1]), real.(yU_1[1]), real.(ywT1[1]), real.(yU0[1])])
+end
+
+# Load a saved set of support functions
+function load_supporter_functions(filepath, I)
+    # Load saved supporter_functions
+    supp = readdlm(filepath)
+    
+    # Extract numbers
+    x1 = []; x2 = [];
+    ywT0 = []; yU_1 = []; ywT1 = []; yU0 = []
+    append!(ywT0, [supp[3,:][supp[3,:].!=""]]); append!(yU_1, [supp[4,:][supp[4,:].!=""]]); 
+    append!(ywT1, [supp[5,:][supp[5,:].!=""]]); append!(yU0, [supp[6,:][supp[6,:].!=""]]); 
+    
+    # Extract x
+    x1 = supp[1,:][supp[1,:].!=""]; x2 = supp[2,:][supp[2,:].!=""];
+    
+    # Interpolate solutions
+    s = unique(2. ./ (I[2:end] - I[1:end-1]))
+    if s != [1.0]
+        @warn "Scaling vector is not [1.0], the loaded solutions are probably not correct."
+    end
+    return interpolate_supporter_functions(x1, x2, (ywT0, yU_1, ywT1, yU0), I, s)
 end

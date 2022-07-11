@@ -24,7 +24,7 @@ axes(P::ExtendedJacobi) = (Inclusion(ℝ), OneToInf())
 ==(P::ExtendedJacobi, Q::ExtendedJacobi) = P.a == Q.a && P.b == Q.b
 
 function getindex(P::ExtendedJacobi{T}, x::Real, j::Int)::T where T
-    -1 <= x <= 1 && return Jacobi{T}(P.a, P.b)[x,j]
+    x in ChebyshevInterval() && return Jacobi{T}(P.a, P.b)[x,j]
     return error("Not implemented for |x|>1 yet.")
 end
 
@@ -46,6 +46,6 @@ axes(H::ExtendedWeightedJacobi) = (Inclusion(ℝ), OneToInf())
 ==(P::ExtendedWeightedJacobi, Q::ExtendedWeightedJacobi) = P.a == Q.a && P.b == Q.b
 
 function getindex(P::ExtendedWeightedJacobi{T}, x::Real, j::Int)::T where T
-    -1 <= x <= 1 && return Weighted(Jacobi{T}(P.a, P.b))[x,j]
+    x in ChebyshevInterval() && return Weighted(Jacobi{T}(P.a, P.b))[x,j]
     return 0.
 end

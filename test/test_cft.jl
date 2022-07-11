@@ -1,4 +1,5 @@
 using Test, SumSpaces, LinearAlgebra, FFTW, Interpolations
+import SumSpaces: affinetransform
 
 @testset "cft" begin
 
@@ -38,6 +39,12 @@ using Test, SumSpaces, LinearAlgebra, FFTW, Interpolations
         @test isapprox(imag.(uS[2][2]), [ -0.117309, 0.117309,  -0.117309,  0.117309],atol=1e-5)
         @test isapprox(imag.(uS[3][2]), [ -1.50198e-9,1.50198e-9,  -1.50198e-9,  1.50198e-9],atol=1e-5)
         @test isapprox(imag.(uS[4][2]), [ 3.62098e-25,-1.81049e-25, 0.0,  1.86831e-25],atol=1e-5)
+        
+        @test_logs (:warn,"μ ≈ 0, λ < 0, and λ ∈ Sample, we slightly perturb λ to avoid NaNs in the FFT computation in supporter_functions in cft.jl"
+        ) (x, uS) = supporter_functions(-1, 0, 0, W=1., δ=0.5, s=[1.0], N=5)
+        for j = 1:4
+            isnan.(uS[j][1]) == zeros(4)
+        end
     end
 
     @testset "cifft" begin
@@ -142,6 +149,28 @@ using Test, SumSpaces, LinearAlgebra, FFTW, Interpolations
         for i = 1:4
             @test size(uS[i]) == (5,)
         end
+
+        uS = fft_supporter_functions(0, 0, 0, N=5, W=1, δ=0.5, I=[-3.,-1,1])
+        for i = 1:4
+            @test size(uS[i]) == (2,)
+        end
+        half_laplace_wT0 = x -> abs(x) <= 1 ? log(2)-Base.MathConstants.eulergamma : log(2)-Base.MathConstants.eulergamma-asinh(sqrt(x^2-1))
+        half_laplace_U_1 = x -> abs(x) <= 1 ? -asin(x) : -sign(x)*pi/2
+        ewU = ExtendedWeightedChebyshevU()
+        eT = ExtendedChebyshevT()
+        x = Array(-10:0.1:10)
+        @test uS[1][1].(x) == half_laplace_wT0.(affinetransform.(-3., -1., x))
+        @test uS[2][1].(x) == half_laplace_U_1.(affinetransform.(-3., -1., x))
+        @test uS[3][1].(x) == eT[(affinetransform.(-3., -1., x)), 2]
+        @test uS[4][1].(x) == ewU[(affinetransform.(-3., -1., x)), 1]
+        @test uS[1][2].(x) == half_laplace_wT0.(x)
+        @test uS[2][2].(x) == half_laplace_U_1.(x)
+        @test uS[3][2].(x) == eT[x, 2]
+        @test uS[4][2].(x) == ewU[x, 1]
+        
+        
+        @test_throws ErrorException("λ == μ == η ≈ 0, currently can only handle translations of the reference interval [-1,1]."
+        ) uS = fft_supporter_functions(0, 0, 0, N=5, W=1, δ=0.5, I=[-4.,-1,1])
     end
 
     @testset "coefficient_supporter_functions" begin
@@ -160,7 +189,6 @@ using Test, SumSpaces, LinearAlgebra, FFTW, Interpolations
         end
     end
 
-
     @testset "inverse_fourier_transform" begin
 
         # Check that the FFT approximated IFT of √(π)exp(-x²/4) is 
@@ -168,10 +196,30 @@ using Test, SumSpaces, LinearAlgebra, FFTW, Interpolations
 
         f = x -> sqrt(π).*exp.(-x.^2 ./ 4)
         W = 1e3; δ = 1e-3; ω=range(-W, W, step=δ); ω = ω[1:end-1]
-
-        (x, IFT_f) = inverse_fourier_transform(f, ω)
+        x = ifftshift(fftfreq(length(ω), 1/δ) * 2 * pi)
+        IFT_f = inverse_fourier_transform(f, ω, x)
         @test isapprox(imag.(IFT_f), zeros(length(IFT_f)), atol=1e-12)
         @test isapprox(real.(IFT_f), exp.(-x.^2), atol=1e-13)
+    end
+
+    @testset "save & load supporter functions" begin
+        λ=1; μ=1; η=1; W=1; δ=0.5; s=[1.0]; N=5;
+        (x, uS) = supporter_functions(λ, μ, η, W=W, δ=δ, s=s, N=N, stabilise=true)
+        uS[3][1] = uS[3][1][1:end-1]; uS[4][1] = uS[4][1][1:end-1]
+
+        filepath="test_save.txt"
+        save_supporter_functions(filepath, x, x[1:end-1], uS)
+        
+        @test isfile("test_save.txt")
+
+        intervals = [-1.,1.]
+        uS = load_supporter_functions(filepath, intervals)
+        @test uS[1][1](-1.0) ≈ 0.506553312356948
+        @test uS[2][1](-1.0) ≈ -0.09935729371218244
+        @test uS[3][1](-1.0) ≈ 3.2832101182361583e-10
+        @test uS[4][1](-1.0) ≈ -7.10792435158098e-8
+
+        rm(filepath, recursive=true)
     end
 
 end
