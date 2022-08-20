@@ -153,7 +153,7 @@ for k = [1,51,101]
     tdisplay = round(t, digits=2)
     yy = ASp[xx,1:length(u[k])]*u[k]
     
-    p = plot!(xx,yy, title=L"$\mathrm{5\ intervals}$", 
+    p = plot!(xx,yy, title=L"$\mathrm{Snapshots}$", 
             label=L"$\mathrm{time}=$"*"$tdisplay"*L"$\ \mathrm{(s)}$", 
             legendfontsize = 10, legend=:topleft, xlim=xlim, ylim=ylim,
             xlabel=L"$x$",
