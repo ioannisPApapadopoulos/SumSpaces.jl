@@ -117,12 +117,13 @@ end
 errors = readdlm("errors-x-inf-ex2.txt") 
 N = Int32.(errors[:,2])
 errors = errors[:,1]
-plot(N, log10.(errors),
+plot(N, errors, #log10.(errors),
     title=L"$\mathrm{Error}$",
     legend=false,
-    ylabel=L"$\log_{10}(\infty\mathrm{-norm \;\; error})$",
+    ylabel=L"$\infty\mathrm{-norm \;\; error}$",
     xlabel=L"$n$",
-    ylim=[log10(1e-15),log10(1e-3)],
+    ylim=[1e-15, 1e-3],
+    yscale=:log10,
     xtickfontsize=10, ytickfontsize=10,xlabelfontsize=15,ylabelfontsize=15,
     linewidth=2,
     marker=:dot,
