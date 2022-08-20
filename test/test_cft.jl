@@ -109,7 +109,7 @@ import SumSpaces: affinetransform
     @testset "fft_supporter_functions" begin
         uS = fft_supporter_functions(1, 1, 1, N=5, W=1, δ=0.5)
 
-        @test typeof(uS) == NTuple{4, Vector{Interpolations.GriddedInterpolation{Float64, 1, Float64, Gridded{Linear{Throw{OnGrid}}}, Tuple{Vector{Float64}}}}}
+        @test typeof(uS) <: NTuple{4}
         for i = 1:4   
             @test size(uS[i]) == (1,) 
         end
