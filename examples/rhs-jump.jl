@@ -65,28 +65,30 @@ for N in Nn
     # writedlm("errors-rhs-jump-dual-1e-4.txt", errors4)
 end
 
-# errors1 = readdlm("rhs-jump/errors-rhs-jump-primal-1e-2.txt")
-# errors2 = readdlm("rhs-jump/errors-rhs-jump-primal-1e-4.txt")
-# errors3 = readdlm("rhs-jump/errors-rhs-jump-dual-1e-2.txt")
-# errors4 = readdlm("rhs-jump/errors-rhs-jump-dual-1e-4.txt")
+# errors1 = readdlm("errors-rhs-jump-primal-1e-2.txt")
+# errors2 = readdlm("errors-rhs-jump-primal-1e-4.txt")
+# errors3 = readdlm("errors-rhs-jump-dual-1e-2.txt")
+# errors4 = readdlm("errors-rhs-jump-dual-1e-4.txt")
 
-plot(Nn, log10.(errors1),
+plot(Nn, errors1,
     title="Error",
     legend=:bottomleft,
     markers=:circle,
     xlabel=L"$n$",
-    ylabel=L"$\log_{10}(L^2\mathrm{-norm \;\; error})$",
-    # ylim=[log10(1e-15),log10(1e-3)],
+    ylabel=L"$L^2\mathrm{-norm \;\; error}$",
+    yscale=:log10,
+    # ylim=[1e-25,1e-3],
     xtickfontsize=10, ytickfontsize=10,xlabelfontsize=15,ylabelfontsize=15,
     linewidth=2,
     marker=:dot,
     markersize=5,
+    yticks = [1e-5, 1e-10, 1e-15, 1e-20, 1e-25],
     label=L"Sum space $h=10^{-2}$")
-plot!(Nn, log10.(errors2), title="Error",markers=:circle,xlabel=L"$n$",ylabel=L"$\log_{10}(L^2\mathrm{-norm \;\; error})$",
+plot!(Nn, errors2, title="Error",markers=:circle,xlabel=L"$n$",ylabel=L"$L^2\mathrm{-norm \;\; error}$", yscale=:log10,
     xtickfontsize=10, ytickfontsize=10,xlabelfontsize=15,ylabelfontsize=15,linewidth=2,marker=:dot,markersize=5,label=L"Sum space $h=10^{-4}$")
-plot!(Nn, log10.(errors3), title="Error",markers=:circle,xlabel=L"$n$",ylabel=L"$\log_{10}(L^2\mathrm{-norm \;\; error})$",
+plot!(Nn, errors3, title="Error",markers=:circle,xlabel=L"$n$",ylabel=L"$L^2\mathrm{-norm \;\; error}$", yscale=:log10,
     xtickfontsize=10, ytickfontsize=10,xlabelfontsize=15,ylabelfontsize=15,linewidth=2,marker=:dot,markersize=5,label=L"Dual sum space $h=10^{-2}$")
-plot!(Nn, log10.(errors4), title="Error",markers=:circle,xlabel=L"$n$",ylabel=L"$\log_{10}(L^2\mathrm{-norm \;\; error})$",
+plot!(Nn, errors4, title="Error",markers=:circle,xlabel=L"$n$",ylabel=L"$L^2\mathrm{-norm \;\; error}$", yscale=:log10,
     xtickfontsize=10, ytickfontsize=10,xlabelfontsize=15,ylabelfontsize=15,linewidth=2,marker=:dot,markersize=5,label=L"Dual sum space $h=10^{-4}$")
 
 # savefig("errors-rhs-infty2.pdf")
