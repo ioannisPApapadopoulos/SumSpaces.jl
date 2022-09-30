@@ -15,14 +15,14 @@ function collocation_points(M::Int, Me::Int; I::AbstractVector=[-1.,1.], endpoin
     el_no = length(I)-1
 
     x = Array{Tp}(undef,el_no*M+2*Me)
-    xnodes = LinRange{Tp}(innergap,1-innergap,M)
+    # xnodes = LinRange{Tp}(innergap,1-innergap,M)
     # chebnodes = sort(cos.(π.*xnodes))
 
     xxnodes = LinRange{Tp}(-1+innergap,1-innergap,M)
     for el = 1:el_no
         x[(el-1)*M+1:el*M] = at(I[el], I[el+1], xxnodes) 
     end
-    xnodes = LinRange{Tp}(innergap,1-innergap,Me)
+    # xnodes = LinRange{Tp}(innergap,1-innergap,Me)
     # chebnodes = sort(cos.(π.*xnodes))
 
     xxnodes = LinRange{Tp}(-1+innergap,1-innergap,Me)
@@ -34,11 +34,16 @@ end
 # Convert function evaluation to Riemann sum
 function riemann(x::AbstractVector, f)
     y = sort(x)
-    h = 0.5 .* (
-            append!(y[2:end], y[end]) .- y
-         .+ y .- append!([y[1]], y[1:end-1])
-    )
-    return sqrt.(h).*f(y)
+    h = (vcat(y[2:end], y[end]) .- vcat([y[1]], y[1:end-1]))/2
+    # return sqrt.(h).*f(y)
+    return h.*f(y)
+end
+
+# Convert function evaluation to Riemann sum
+function riemannT(x::AbstractVector, f)
+    y = sort(x)
+    h = (vcat(y[2:end], y[end]) .- vcat([y[1]], y[1:end-1]))/2
+    return asin.(h).*f(y)
 end
 
 # Just function evaluation
@@ -54,6 +59,14 @@ function riemannf(x::AbstractVector, f)
          .+ y .- append!([y[1]], y[1:end-1])
     )
     return sqrt.(h).*f.(y)
+end
+
+# Convert function evaluation to Riemann sum
+function riemannTf(x::AbstractVector, f)
+    y = sort(x)
+    ay = asin.(y)
+    h = (vcat(ay[2:end], ay[end]) .- vcat([ay[1]], ay[1:end-1]))/2
+    return h.*f.(y)
 end
 
 # Fit low order expansion to higher order expansion

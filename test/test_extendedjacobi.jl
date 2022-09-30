@@ -27,8 +27,11 @@ using SumSpaces
 
     @testset "Evaluation" begin
         
-        # Constant conversions for a = 0.5; b = 0.5
-        wJ = n -> 2^(2(n-1)+1)/binomial(2(n-1)+2,n)
+        # Constant conversions for to extended ChebyshevU, a = 0.5; b = 0.5
+        wPU = n -> 2^(2(n-1)+1)/binomial(2(n-1)+2,n)
+
+        # Constant conversions for to extended ChebyshevT, a = -0.5; b = -0.5
+        wPT = n -> 2^(2(n-1))/binomial(2(n-1),n-1)
         
         @testset "Extended Weighted Jacobi" begin
             a = 0.5; b = 0.5
@@ -42,15 +45,16 @@ using SumSpaces
         end
 
         @testset "Extended Jacobi" begin
-            a = 0.5; b = 0.5
+            a = -0.3; b = -0.3
             eP = ExtendedJacobi(a,b)
             P = Jacobi(a,b)
-            eU = ExtendedChebyshevU()
-
             @test eP[0.1, 1:20] == P[0.1, 1:20]
-            @test wJ.(1:20) .* eP[0.1, 1:20] ≈ eU[0.1, 3:22]
-            # Not implemented yet
-            # @test eP[1.1, 1:20] == ???
+            @test eP[1.1, 1:5] ≈ [0.7366510982212272, 0.28439670853378274, 0.14277057893441303, 0.07782569907567304, 0.044185715144731255]
+
+            # Check special cases equal to extended ChebyshevT or ChebyshevU (modulo a constant)
+            x = [-5., -3.1, -1.1, 0.1, 0.8, 1.3, 5.7]
+            @test ExtendedJacobi(0.5,0.5)[x, 1:20] .* wPU.(1:20)' ≈ ExtendedChebyshevU()[x, 3:22]
+            @test ExtendedJacobi(-0.5,-0.5)[x, 2:21] .* wPT.(2:21)' ≈ ExtendedChebyshevT()[x, 2:21]
         end
     end
 
