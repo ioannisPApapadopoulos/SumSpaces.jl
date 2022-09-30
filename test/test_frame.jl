@@ -48,9 +48,9 @@ using Test, SumSpaces
             Sp = SumSpaceP()
             x = [-0.5,0.5]
             A = framematrix(x, Sp, 1)
-            @test A[Block.(1), Block.(1)] ≈ [sqrt(2)/2, sqrt(2)/2]
-            @test A[Block.(1), Block.(2)] ≈ [[0.6123724356957946,0.6123724356957946] [-0.3535533905932738,0.3535533905932738]]
-            @test A[Block.(1), Block.(3)] ≈ [[-0.6123724356957946,0.6123724356957946] [-0.3535533905932738,-0.3535533905932738]]
+            @test A[Block.(1), Block.(1)] ≈ [0.5, 0.5]
+            @test A[Block.(1), Block.(2)] ≈ [[0.4330127018922193, 0.4330127018922193] [-0.25,0.25]]
+            @test A[Block.(1), Block.(3)] ≈ [[-0.4330127018922193,0.4330127018922193] [-0.25,-0.25]]
         
             A = framematrix(x, Sp, 1, normtype=evaluate)
             @test A[Block.(1), Block.(1)] ≈ [1,1]
@@ -64,10 +64,10 @@ using Test, SumSpaces
         x = [-0.5,0.5]
         A = framematrix(x, Sd, 1)
         @test A[Block.(1), Block.(1)] ≈ [0, 0]
-        @test isapprox(A[Block.(1), Block.(2)], [[0.816497,0.816497] [0,0]], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(3)], [[-0.408248,0.408248] [0.707107,0.707107]], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(4)], [[-0.408248,-0.408248] [-0.707107,0.707107]], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(5)], [[0.816497,-0.816497] [0,0]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(2)], [[0.57735,0.57735] [0,0]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(3)], [[-0.288675,0.288675] [0.5,0.5]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(4)], [[-0.288675,-0.288675] [-0.5,0.5]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(5)], [[0.57735,-0.57735] [0,0]], atol=1e-5)
     
         A = framematrix(x, Sd, 1, normtype=evaluate)
         @test A[Block.(1), Block.(1)] ≈ [0,0]
@@ -81,11 +81,11 @@ using Test, SumSpaces
         Sp = ElementSumSpaceP([-2,-1,1.])
         x = [-0.5,0.5]
         A = framematrix(x, Sp, 1)
-        @test isapprox(A[Block.(1), Block.(1)], [0.707107,0.707107], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(2)], [[0,0] [0.612372,0.612372]], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(3)], [[0.189469,0.0898143] [-0.353553,0.353553]], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(4)], [[0,0] [-0.612372,0.612372]], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(5)], [[0.050768,0.0114079] [-0.353553,-0.353553]], atol=1e-5)       
+        @test isapprox(A[Block.(1), Block.(1)], [0.5,0.5], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(2)], [[0,0] [0.433013,0.433013]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(3)], [[0.133975, 0.0635083 ] [-0.25,0.25]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(4)], [[0,0] [-0.433013,0.433013]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(5)], [[0.0358984, 0.00806662 ] [-0.25,-0.25]], atol=1e-5)       
 
         A = framematrix(x, Sp, 1, normtype=evaluate)
         @test A[Block.(1), Block.(1)] ≈ [1,1]
@@ -99,12 +99,12 @@ using Test, SumSpaces
         Sd = ElementSumSpaceD([-2,-1,1.])
         x = [-0.5,0.5]
         A = framematrix(x, Sd, 1)
-        @test isapprox(A[Block.(1), Block.(1)], [ -0.816497,-0.730297], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(2)], [[0,0] [0.816497,0.816497]], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(3)], [[-0.408248,-0.182574] [0,0]], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(4)], [[0,0] [-0.408248,0.408248]], atol=1e-5)
-        @test isapprox(A[Block.(1), Block.(5)], [[-0.10939,-0.02319] [0.707107,0.707107]], atol=1e-5)       
-        @test isapprox(A[Block.(1), Block.(9)], [[-0.00785383,-0.000374129] [0,0]], atol=1e-5)  
+        @test isapprox(A[Block.(1), Block.(1)], [ -0.5773502691896258,-0.5163977794943222], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(2)], [[0,0] [0.57735, 0.57735]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(3)], [[-0.288675,-0.129099] [0,0]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(4)], [[0,0] [-0.288675,0.288675]], atol=1e-5)
+        @test isapprox(A[Block.(1), Block.(5)], [[-0.0773503,-0.0163978] [0.5,0.5]], atol=1e-5)       
+        @test isapprox(A[Block.(1), Block.(9)], [[-0.0055535,-0.000264549] [0,0]], atol=1e-5)  
 
         A = framematrix(x, Sd, 1, normtype=evaluate)
         @test A[Block.(1), Block.(1)] ≈ [Sd[-0.5,1],Sd[0.5,1]]
