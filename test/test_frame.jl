@@ -26,6 +26,7 @@ using Test, SumSpaces
         @test collocation_points(5, 3, I=[-2, 2.], endpoints=[-10,10.]) == [-10.0,-6.0,-2.0,-1.0,0.0,1.0,2.0,6.0,10.0]
         @test collocation_points(5, 3, I=[-2, 2.], endpoints=[-10,10.], innergap=0.5) ==  [-8.0,-6.0,-4.0,-1.0,-0.5,0.0,0.5,1.0,4.0,6.0,8.0]
         @test collocation_points(5, 3, I=[-2, 2.,3]) ==  [-5.0,-3.5,-2.0,-1.0,0.0,1.0,2.0,2.25,2.5,2.75,3.0,4.0,5.0]
+        @test collocation_points(5, 3, I=[-2, 2.,3], remove_endpoints=true) == [-5.0,-3.5,-1.0,0.0,1.0,2.25,2.5,2.75,4.0,5.0]
     end
 
     @testset "riemann/evaluate" begin
