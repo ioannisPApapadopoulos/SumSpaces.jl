@@ -10,7 +10,7 @@ end
 at(a,b,x) = (b-a)/2 * x .+ (b+a)/2
 
 # Construct collocation points
-function collocation_points(M::Int, Me::Int; I::AbstractVector=[-1.,1.], endpoints::AbstractVector=[-5.,5.], innergap::Real = 0.)
+function collocation_points(M::Int, Me::Int; I::AbstractVector=[-1.,1.], endpoints::AbstractVector=[-5.,5.], innergap::Real = 0., remove_endpoints::Bool=false)
     Tp = eltype(I)
     el_no = length(I)-1
 
@@ -28,6 +28,10 @@ function collocation_points(M::Int, Me::Int; I::AbstractVector=[-1.,1.], endpoin
     xxnodes = LinRange{Tp}(-1+innergap,1-innergap,Me)
     x[el_no*M+1:el_no*M+Me] = at(endpoints[1], I[1], xxnodes) 
     x[el_no*M+1+Me:el_no*M+2*Me] = at(I[end],endpoints[2],xxnodes)
+
+    if remove_endpoints
+        filter!(x->x∉I, x)
+    end
     return sort(unique(x))
 end
 
@@ -119,4 +123,8 @@ function framematrix(x::AbstractVector, Sd::ElementSumSpaceD, Nn::Int; normtype:
     # Form columns of Least Squares matrix.
     A[:,Block.(1:length(cols))] = normtype(x, x->Sd[x, Block.(1:length(cols))])
     return A
+end
+
+function framematrix(x::AbstractVector, eU::ExtendedChebyshevU, Nn::Int; normtype::Function=riemann)
+    return normtype(x, x->eU[x, 1:Nn])
 end
