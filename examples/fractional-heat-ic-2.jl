@@ -1,6 +1,7 @@
 using SumSpaces, FFTW, SpecialFunctions
 import LinearAlgebra: I, norm
 using LaTeXStrings, Plots
+using Interpolations
 
 """
 This script implements the "Fractional heat equation (second initial condition)" example found in
@@ -9,9 +10,7 @@ This script implements the "Fractional heat equation (second initial condition)"
 
 We want to solve 
 
-((-Δ)^1/2 + ∂ₜ) u(x, t) = 0, u(x, 0) = 1/(1+x²), u(x, t) → 0 as |x| → ∞. 
-
-This has the exact solution u(x, t) = (1+t)/(x² + (1+t)²).
+((-Δ)^1/2 + ∂ₜ) u(x, t) = 0, u(x, 0) = √(1-x²)₊, u(x, t) → 0 as |x| → ∞. 
 
 We discretize in time with backward Euler and obtain
 
@@ -19,7 +18,7 @@ We discretize in time with backward Euler and obtain
 
 where λ = 1/timestep. We can solve this repeatedly. 
 
-We measure the inf-norm error with over time with the exact solution.
+We measure the inf-norm error over time with an approximate solution computed via an FFT.
 
 """
 
@@ -40,9 +39,9 @@ xc = collocation_points(M, Me, I=intervals, endpoints=[-20.,20]) # Collocation p
 A = framematrix(xc, eSp, N, normtype=evaluate) # Blocked frame matrix
 
 # Compute support functions
-@time uS = fft_supporter_functions(λ, μ, η, I=intervals, W=1e4, δ=1e-2); # Actual functions
+uS = fft_supporter_functions(λ, μ, η, I=intervals, W=1e4, δ=1e-2); # Actual functions
 # Element primal sum space coefficients
-@time cuS = coefficient_supporter_functions(A, xc, uS, 2N+3, normtype=evaluate) 
+cuS = coefficient_supporter_functions(A, xc, uS, 2N+3, normtype=evaluate) 
 
 # Create appended sum space
 ASp = ElementAppendedSumSpace(uS, cuS, intervals)
@@ -127,10 +126,12 @@ end
 W=1e3; δ=1e-3
 ω=range(-W, W, step=δ); ω = ω[1:end-1]
 @time (fx, fv) = fractional_heat_fourier_solve(ω, timesteps)
+fv = [interpolate((fx,), fv[k], Gridded(Linear())) for k = 1:timesteps+1]
 
 # Plot solution and collect norm difference with Fourier-based solution
 p = plot() 
-xx = fx[-20 .< fx .< 20]
+# xx = fx[-20 .< fx .< 20]
+xx = -20:0.01:20
 xlim = [xx[1],xx[end]]; ylim = [-0.02,1]
 errors = []
 for k = 1:timesteps+1
@@ -139,16 +140,16 @@ for k = 1:timesteps+1
     tdisplay = round(t, digits=2)
     yy = ASp[xx, 1:length(u[k])]*u[k]
     
-    append!(errors, norm((fv[k][-20 .< fx .< 20])-yy, Inf))
+    append!(errors, norm(fv[k](xx)-yy, Inf))
     # p = plot(xx, yy, title="time=$tdisplay (s)", label="Spectral method", legend=:topleft, xlim=xlim, ylim=ylim)
-    # p = plot!(xx, fv[k][-20 .< fx .< 20], label="Fourier", legend=:topleft, xlim=xlim, ylim=ylim)
-    # display(  p)
+    # p = plot!(xx, fv[k](xx), label="Fourier", legend=:topleft, xlim=xlim, ylim=ylim)
+    # display(p)
 end
 
 ###
 # Plot inf-norm difference with Fourier solution at each timestep
 ###
-plot(1:length(errors), errors, legend=:none, 
+plot(3:length(errors), errors[3:end], legend=:none, 
     title="Error",
     markers=:circle,
     xlabel=L"$k$",
@@ -165,7 +166,7 @@ for k = [1,51,101]
     tdisplay = round(t, digits=2)
     yy = ASp[xx,1:length(u[k])]*u[k]
     
-    p = plot!(xx,yy, title=L"$\mathrm{Snapshots}$", 
+    p = plot!(xx,yy,
             label=L"$\mathrm{time}=$"*"$tdisplay"*L"$\ \mathrm{(s)}$", 
             legendfontsize = 10, legend=:topleft, xlim=xlim, ylim=ylim,
             xlabel=L"$x$",

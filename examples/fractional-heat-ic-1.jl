@@ -19,7 +19,7 @@ We discretize in time with backward Euler and obtain
 
 where λ = 1/timestep. We can solve this repeatedly. 
 
-We measure the inf-norm error with over time with the exact solution.
+We measure the inf-norm error over time with the exact solution.
 
 """
 
@@ -153,7 +153,7 @@ for k = [1,51,101]
     tdisplay = round(t, digits=2)
     yy = ASp[xx,1:length(u[k])]*u[k]
     
-    p = plot!(xx,yy, title=L"$\mathrm{Snapshots}$", 
+    p = plot!(xx,yy,
             label=L"$\mathrm{time}=$"*"$tdisplay"*L"$\ \mathrm{(s)}$", 
             legendfontsize = 10, legend=:topleft, xlim=xlim, ylim=ylim,
             xlabel=L"$x$",

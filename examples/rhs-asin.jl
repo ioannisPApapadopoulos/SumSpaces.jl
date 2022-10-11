@@ -8,28 +8,29 @@ using DelimitedFiles
 using SumSpacesMathLink
 
 """
-This script implements the "Discontinuous right-hand side" example found in
+This script implements the "Nonsmooth right-hand side" example found in
 
 "A sparse spectral method for a one-dimensional fractional PDE problem" by I. P. A. Papadopoulos and S. Olver. 
 
-We first approximate the error of a discontinuous function f(x) = 1 if |x| ≤ 1, 0 otherwise, as expanded
-in the sum space and dual sum space. 
+We first approximate the error of a nonsmooth function f(x) = asin(x) if |x| ≤ 1, asin(1) sign(x) exp(-|x| + 1)
+otherwise, as expanded in the sum space and dual sum space. 
 
 Next we approximately solve the equation:
 
 ((-Δ)^1/2 + I) u(x) = f(x), u(x) → 0 as |x| → ∞. 
 """
 
-fa = x -> abs(x) < 1 ? 1 : 0
+fa = x -> abs(x) < 1 ? asin(x) : asin(1)*sign(x)*exp(-abs(x) + 1)
 
+xx = -5:0.01:5
 intervals = [-5,-3,-1.,1,3,5]; 
 eSp = ElementSumSpaceP(intervals); 
 eSd = ElementSumSpaceD(intervals);
 
 ### Collect errors
 Nn = [3,5,7,11,15,21,31,41,51,61,71,81,91,101]
-errors1 = [];
-xx1 = -5:0.01:5;
+errors1 = []
+xx1 = -5:0.01:5
 for N in Nn
     M = max(N^2,6001)
     x = collocation_points(M, M, I=intervals, endpoints=[-10,10]) # Collocation points
@@ -38,8 +39,9 @@ for N in Nn
 
     ff1 = eSp[xx1,1:length(f)]*f
     append!(errors1, norm(fa.(xx1).-ff1,∞)) 
-    writedlm("errors-rhs-jump-primal.txt", errors1)
+    writedlm("errors-rhs-asin-primal-inf.txt", errors1)
 end
+
 
 errors2 = [];
 for N in Nn
@@ -49,17 +51,18 @@ for N in Nn
     fdual = Matrix(Adual) \ fa.(xdual)
     ffd1 = eSd[xx1,1:length(fdual)]*fdual
     diff1 = abs.(fa.(xx1).-ffd1)
-    diff1[isnan.(ffd1)] .= 0;
+    diff1[isnan.(ffd1)] .= 0
     append!(errors2, norm(diff1,∞)) 
-    writedlm("errors-rhs-jump-dual-inf.txt", errors2)
+    writedlm("errors-rhs-asin-dual-inf.txt", errors2)
 end
 
-errors1 = readdlm("errors-rhs-jump-primal-inf.txt")
-errors2 = readdlm("errors-rhs-jump-dual-inf.txt")
+errors1 = readdlm("errors-rhs-asin-primal-inf.txt")
+errors2 = readdlm("errors-rhs-asin-dual-inf.txt")
 
+p = plot()
 plot(Nn, errors1,
     title="Right-hand side error",
-    legend=:bottomleft,
+    legend=:topright,
     markers=:circle,
     xlabel=L"$n$",
     ylabel=L"$\infty\mathrm{-norm \;\; error}$",
@@ -69,11 +72,11 @@ plot(Nn, errors1,
     linewidth=2,
     marker=:dot,
     markersize=5,
-    yticks = [1e-5, 1e-10, 1e-15, 1e-20, 1e-25],
+    yticks = [1e-3, 1e-5, 1e-7, 1e-10, 1e-15, 1e-20, 1e-25],
     label="Sum space")
 plot!(Nn, errors2, title="Right-hand side error",markers=:circle,xlabel=L"$n$",ylabel=L"$\infty\mathrm{-norm \;\; error}$", yscale=:log10,
     xtickfontsize=10, ytickfontsize=10,xlabelfontsize=15,ylabelfontsize=15,linewidth=2,marker=:dot,markersize=5,label="Dual sum space")
-savefig("errors-rhs-infty-norm.pdf")
+savefig("errors-rhs-asin.pdf")
 
 
 ###
@@ -89,15 +92,16 @@ for fN in fNn
     A = framematrix(xc, eSp, fN, normtype=evaluate) 
     f = Matrix(A) \ fa.(xc)
     us = []
+    # Nn = fN:2:fN+12
     Nn = fN==31 ? (fN:2:fN+12) : (fN:2:fN+16)
     for N in Nn
         # Compute/load support functions
         # Uncomment these two lines if support function already computed and saved.
-        # filepath = "uS-lmbda-$λ-mu-$μ-eta-$η/uS-N-$N.txt"
-        # uS = load_supporter_functions(filepath, intervals);
+        filepath = "uS-lmbda-$λ-mu-$μ-eta-$η/uS-N-$N.txt"
+        uS = load_supporter_functions(filepath, intervals);
 
         # Comment this out if support functions already computed
-        uS = fft_mathematica_supporter_functions(λ, μ, η, I=intervals, N=N, W=1e4, δ=1e-2, stabilise=true, maxrecursion=100)
+        # uS = fft_mathematica_supporter_functions(λ, μ, η, I=intervals, N=N, W=1e4, δ=1e-2, stabilise=true, maxrecursion=100)
 
         # Element primal sum space coefficients
         M = max(N^2,6001)
@@ -151,10 +155,11 @@ for fN in fNn
         fA = coefficient_interlace(fA, N, K)
 
         append!(us, [u])
-        writedlm("cauchy-sequences/rhs-jump-$fN.txt", us)
+        writedlm("cauchy-sequences/rhs-asin-$fN.txt", us)
         print("Computed: $fN : $N")
     end
 end
+
 
 ###
 # Plot the solution
@@ -162,7 +167,7 @@ end
 fNn = [11, 15, 21, 27]
 p = plot()
 for fN in fNn
-    ms = readdlm("cauchy-sequences/rhs-jump-$fN.txt")
+    ms = readdlm("cauchy-sequences/rhs-asin-$fN.txt")
     Nn = fN:2:fN+16
     us = []
     for (N, j) in zip(Nn, 1:length(Nn))
@@ -174,7 +179,6 @@ for fN in fNn
         append!(dfs, [df])
     end
     plot!(Nn[2:end], dfs,
-        # title="Solution error",
         legend=:bottomleft,
         label = L"$n_f=$" * "$fN",
         markers=:circle,
@@ -188,26 +192,24 @@ for fN in fNn
     )
 end
 display(p)
-# savefig("rhs-jump-cauchy.pdf")
+# savefig("rhs-asin-cauchy.pdf")
+
 
 p = plot(xx1, us[end], ylabel=L"$y$", xlabel=L"$x$", title="Numerical solution", ytickfontsize=10,xlabelfontsize=15,ylabelfontsize=15,legend=:topleft, label=:none)
-# savefig(p, "example-rhs-jump.pdf")
+# savefig(p, "example-rhs-asin.pdf")
 
 ### 
 # Plot Cauchy convergence in the solution
 ###
 plot(Nn2, cauchy_error_inf,
     title="Solution error",
-    # legend=:bottomleft,
     markers=:circle,
     xlabel=L"$n$",
     ylabel="error",
     yscale=:log10,
-    # ylim=[1e-25,1e-3],
     xtickfontsize=10, ytickfontsize=10,xlabelfontsize=15,ylabelfontsize=15,
     linewidth=2,
     marker=:dot,
     markersize=5,
-    # yticks = [1e-5, 1e-10, 1e-15, 1e-20, 1e-25]
 )
-# savefig("coefficient-errors-rhs-jump.pdf")
+# savefig("coefficient-errors-rhs-asin.pdf")
