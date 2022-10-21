@@ -23,7 +23,7 @@ function getindex(ES::ElementSumSpaceP{T}, x::Real, j::Int) where T
 
     el_no = length(ES.I)-1
     if j == 1
-        return SumSpace{1,T}()[x, 1]
+        return SumSpaceP{T}()[x, 1]
     else
         ind = (j-2) ÷ el_no + 1                # Block number - 1
         i = isodd(ind) ? (ind ÷ 2)+1 : ind ÷ 2 # Poly/function order
@@ -90,7 +90,7 @@ function getindex(ASp::ElementAppendedSumSpace{T}, x::Real, j::Int) where T
     ind += 1                                   # Block number
     
     if j == 1
-        return SumSpace{1, T}(ASp.I)[x,1]
+        return SumSpaceP{T}(ASp.I)[x,1]
     elseif 2<=ind<=5
         return convert(T, ASp.A[ind-1][el](x)[1])
     else
@@ -144,7 +144,7 @@ function \(Sd::ElementSumSpaceD, Sp::ElementSumSpaceP)
     Sd.I != Sp.I && error("Element sum spaces bases not centred on same elements")
     el_no = length(Sp.I) - 1
 
-    A = SumSpace{2}() \ SumSpace{1}()
+    A = SumSpaceD() \ SumSpaceP()
     return [A for j in 1:el_no]
 end
 
@@ -242,7 +242,7 @@ end
 #     # FIXME: Temporary hack in finite-dimensional indexing
 #     N = Int64(1e2)
 #     el_no = length(ASp.I) - 1
-#     J = jacobimatrix(SumSpace{1}())[1:2N+3,1:2N+3]
+#     J = jacobimatrix(SumSpaceP())[1:2N+3,1:2N+3]
 #     J[2,1]=0
 
 #     Jm = []

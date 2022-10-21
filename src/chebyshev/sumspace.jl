@@ -1,26 +1,37 @@
 """
-SumSpace{kind,T}()
+SumSpaceP{T}() and SumSpaceD{T}()
 
-is a quasi-matrix representing the sum space of the specified kind (1 or 2)
+are quasi-matrices representing the primal and dual sum spaces
 on (-∞,∞).
 """
 ###
 # Primal and dual sum space
 ###
 
-struct SumSpace{kind,T,E} <: Basis{T} 
+struct SumSpaceP{T,E} <: Basis{T} 
     I::E
 end
-SumSpace{kind, T}(I::AbstractVector=[-1.,1.]) where {kind, T} = SumSpace{kind, T, typeof(I)}(I)
-SumSpace{kind}(I::AbstractVector=[-1.,1.]) where kind = SumSpace{kind, Float64}(I)
 
-const SumSpaceP = SumSpace{1}
-const SumSpaceD = SumSpace{2}
+struct SumSpaceD{T,E} <: Basis{T} 
+    I::E
+end
 
-axes(S::SumSpace) = (Inclusion(ℝ), _BlockedUnitRange(1:2:∞))
+SumSpaceP{T}(I::AbstractVector=[-1.,1.]) where T = SumSpaceP{T, typeof(I)}(I)
+SumSpaceP(I::AbstractVector=[-1.,1.]) = SumSpaceP{Float64}(I)
 
-==(a::SumSpace{kind}, b::SumSpace{kind}) where kind = a.I == b.I
-==(a::SumSpace, b::SumSpace) = false
+SumSpaceD{T}(I::AbstractVector=[-1.,1.]) where T = SumSpaceD{T, typeof(I)}(I)
+SumSpaceD(I::AbstractVector=[-1.,1.]) = SumSpaceD{Float64}(I)
+
+# const SumSpaceP = SumSpace{1}
+# const SumSpaceD = SumSpace{2}
+
+axes(S::SumSpaceP) = (Inclusion(ℝ), _BlockedUnitRange(1:2:∞))
+axes(S::SumSpaceD) = (Inclusion(ℝ), _BlockedUnitRange(1:2:∞))
+
+==(a::SumSpaceP, b::SumSpaceP) = a.I == b.I
+==(a::SumSpaceD, b::SumSpaceD) = a.I == b.I
+
+==(a::SumSpaceP, b::SumSpaceD) = false
 
 function getindex(S::SumSpaceP{T}, x::Real, j::Int)::T where T
     y = affinetransform(S.I[1],S.I[2], x)

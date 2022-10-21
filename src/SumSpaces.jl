@@ -19,6 +19,7 @@ include("jacobi/extendedjacobi.jl")
 include("jacobi/sumspace-jacobi.jl")
 include("frame.jl")
 include("cft/cft.jl")
+include("interlace/sumspace.jl")
 
 export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
