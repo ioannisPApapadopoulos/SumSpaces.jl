@@ -27,11 +27,11 @@ using SumSpaces, LazyArrays, LazyBandedMatrices, ClassicalOrthogonalPolynomials,
 
     Ũ = ExtendedChebyshevU()
     T̃ = ExtendedChebyshevT()
-    M = BlockBroadcastArray(hvcat, 2, unitblocks(-(U'T)), unitblocks([Zeros(∞) W'U]),
+    PQ = BlockBroadcastArray(hvcat, 2, unitblocks(-(U'T)), unitblocks([Zeros(∞) W'U]),
                                       unitblocks(T[:,2:end]'V), unitblocks(U'T))
 
     N = 10
-    M_half = M[Block.(1:N), Block.(1:N+1)]*Δ_s[Block.(2:N+2), Block.(2:N+1)]/π
+    M_half = PQ[Block.(1:N), Block.(1:N+1)]*Δ_s[Block.(2:N+2), Block.(2:N+1)]/π
 
     R = cholesky(Symmetric(M_half)).U
 
@@ -44,4 +44,8 @@ using SumSpaces, LazyArrays, LazyBandedMatrices, ClassicalOrthogonalPolynomials,
                                       unitblocks(T[:,2:end]'W), unitblocks(W'W))
 
     inv(R)'M[Block.(1:N),Block.(1:N)]*inv(R)
+
+
+    R = cholesky(Symmetric(M[Block.(1:N),Block.(1:N)])).U
+    plot(g, P[g,2:21] * inv(R)[:,6])
 end
