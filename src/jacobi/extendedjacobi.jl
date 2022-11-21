@@ -25,7 +25,24 @@ axes(P::ExtendedJacobi) = (Inclusion(ℝ), OneToInf())
 
 function getindex(P::ExtendedJacobi{T}, x::Real, j::Int)::T where T
     x in ChebyshevInterval() && return Jacobi{T}(P.a, P.b)[x,j]
-    return error("Not implemented for |x|>1 yet.")
+
+    if P.a != P.b
+        error("a ≂̸ b, not implemented for different Jacobi parameters.")
+    end
+    s = P.a
+    if isodd(j)
+        n = Int((j-1)/2)
+        c = -Jacobi{T}(s, s)[1,j] * sin(π*(n + s)) * gamma(2n+2s+1) * gamma(n + 1/2)
+        k = 4^s * gamma(s+n+1/2) * Jacobi{T}(s, -1/2)[1,n+1] * sqrt(π) * (-4)^n * gamma(2n+s+3/2)
+        c = c/k
+        return c * _₂F₁(n+s+1/2, n+s+1, 2n+s+3/2, 1/x^2) / abs(x)^(2n+2s+1)
+    else
+        n = Int((j-2)/2)
+        c = Jacobi{T}(s, s)[1,j] * (-1)^(n+1) * sin(π*(n + s)) * gamma(2n+2s+2)  * gamma(n + 3/2)
+        k = 4^s * gamma(s+n+3/2) * Jacobi{T}(s, 1/2)[1,n+1] * sqrt(π) * 2^(2n+1) * gamma(2n+s+5/2)
+        c = c/k
+        return c * x * _₂F₁(n+s+1, n+s+3/2, 2n+s+5/2, 1/x^2) / abs(x)^(2n+2s+3)
+    end
 end
 
 #### 

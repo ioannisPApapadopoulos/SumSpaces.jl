@@ -3,7 +3,7 @@ module SumSpaces
 using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays, 
     ClassicalOrthogonalPolynomials, StaticArrays, ContinuumArrays, DomainSets,
     FillArrays, LazyBandedMatrices, LazyArrays, FFTW, Interpolations, InfiniteArrays,
-    QuasiArrays, DelimitedFiles
+    QuasiArrays, DelimitedFiles, HypergeometricFunctions
 
 import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2, Derivative, jacobimatrix, @simplify
 import Base: in, axes, getindex, ==, oneto, *, \, +, -, convert, broadcasted
@@ -16,15 +16,17 @@ include("chebyshev/extendedchebyshev.jl")
 include("chebyshev/sumspace.jl")
 include("chebyshev/element-sumspace.jl")
 include("jacobi/extendedjacobi.jl")
+include("jacobi/sumspace-jacobi.jl")
 include("frame.jl")
 include("cft/cft.jl")
+include("interlace/sumspace.jl")
 
 export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
         SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace, jacobimatrix,
         ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace, coefficient_interlace, coefficient_stack,
-        ExtendedJacobi, ExtendedWeightedJacobi,
-        solvesvd, collocation_points, riemann, evaluate, framematrix, riemannf,
+        ExtendedJacobi, ExtendedWeightedJacobi, SumSpaceJacobi, SumSpaceJacobiP, SumSpaceJacobiD,
+        solvesvd, collocation_points, riemann, evaluate, framematrix, riemannf, riemannT, riemannTf,
         supporter_functions, fft_supporter_functions, interpolate_supporter_functions, coefficient_supporter_functions, inverse_fourier_transform, load_supporter_functions, save_supporter_functions
 
 
