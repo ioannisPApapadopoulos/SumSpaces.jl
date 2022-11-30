@@ -5,23 +5,39 @@ is a quasi-matrix representing a sum space on ℝ.
 """
 struct SumSpace{T, E} <: Basis{T}
     P
-    Q
     I::E
 end
 
-SumSpace{T}(P, Q, I::AbstractVector=[-1.,1.]) where T = SumSpace{T, typeof(I)}(P, Q, I)
-SumSpace(P, Q) = SumSpace{Float64}(P, Q)
+SumSpace(P, I) where T = SumSpace{Float64, typeof(I)}(P, I::AbstractVector)
+SumSpace{T}(P, I::AbstractVector=[-1.,1.]) where T = SumSpace{T, typeof(I)}(P, I::AbstractVector)
+SumSpace(P) = SumSpace{Float64}(P)
 
 
-axes(S::SumSpace) = (Inclusion(ℝ), _BlockedUnitRange(2:2:∞))
-==(S::SumSpace, Z::SumSpace) = S.P == Z.P && S.Q == Z.Q && S.I == Z.I
+axes(S::SumSpace) = (Inclusion(ℝ), _BlockedUnitRange(length(S.P):length(S.P):∞))
+==(S::SumSpace, Z::SumSpace) = S.P == Z.P && S.I == Z.I
+
+"""
+Let (m,k,n) denote the triple (function number, interval number, polynomial degree). Let M be
+the number of functions in the sum space and K the number of intervals.
+
+We order the functions as:
+
+|(1,1,1), ..., (M,1,1)|, (1,2,1), ..., (M,K,1), (1,1,2), ..., (M, K, ∞).
+
+Note that MK(n-1) + M(k-1) + m = j (index number)
+"""
 
 function getindex(S::SumSpace{T}, x::Real, j::Int)::T where T
-    el_no = length(S.I)-1
-    i = ((j-1) ÷ (2*el_no)) + 1     # Poly/function order
-    el = ((j-1) ÷ 2) % el_no + 1    # Element number
+    M = length(S.P)
+    K = length(S.I)-1
+    n = (j-1) ÷ (M*K) + 1           # polynomial degree
+    k = ((j- M*K*(n-1))-1) ÷ M + 1  # interval number
+    m = j - M*K*(n-1) - M*(k-1)     # function number
 
-    y = affinetransform(S.I[el],S.I[el+1], x)
-    isodd(j) && return S.P[y, i]
-    S.Q[y, i]
+    y = affinetransform(S.I[k],S.I[k+1], x)
+    if S.P[m] isa Function
+        S.P[m](y)[n]
+    else
+        S.P[m][y, n]
+    end
 end
