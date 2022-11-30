@@ -24,6 +24,7 @@ include("cft/cft.jl")
 include("interlace/sumspace.jl")
 include("laguerre/hilbertlaguerre.jl")
 include("laguerre/sumspace.jl")
+include("hermite/extendedhermite.jl")
 
 export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill, Weighted,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
@@ -31,6 +32,7 @@ export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill, Weighted,
         ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace, coefficient_interlace, coefficient_stack,
         ExtendedJacobi, ExtendedWeightedJacobi, SumSpaceJacobi, SumSpaceJacobiP, SumSpaceJacobiD,
         ExtendedWeightedLaguerre, HilbertWeightedLaguerre,
+        ExtendedHermite,
         SumSpaceL, SumSpaceLD,
         solvesvd, collocation_points, riemann, evaluate, framematrix, riemannf, riemannT, riemannTf,
         supporter_functions, fft_supporter_functions, interpolate_supporter_functions, coefficient_supporter_functions, inverse_fourier_transform, load_supporter_functions, save_supporter_functions
