@@ -35,6 +35,13 @@ using SumSpaces, LazyArrays, LazyBandedMatrices, ClassicalOrthogonalPolynomials,
 
     R = cholesky(Symmetric(M_half)).U
 
+    H̃ = P\H*P
+
+    (inv(R) * H̃[Block.(2:N+1), Block.(2:N+1)] * R)
+    
+    
+    [1:5,6:end] |> svdvals
+
     Δ_s[Block.(2:N+2), Block.(2:N+1)] * inv(R)
 
 
