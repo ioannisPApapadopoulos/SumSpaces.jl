@@ -3,17 +3,19 @@ SumSpace{T}()
 
 is a quasi-matrix representing a sum space on ℝ. 
 """
-struct SumSpace{T, E} <: Basis{T}
-    P
+struct SumSpace{T, F, E} <: Basis{T}
+    P::F
     I::E
 end
 
-SumSpace(P, I) where T = SumSpace{Float64, typeof(I)}(P, I::AbstractVector)
-SumSpace{T}(P, I::AbstractVector=[-1.,1.]) where T = SumSpace{T, typeof(I)}(P, I::AbstractVector)
+SumSpace(P, I) where T = SumSpace{Float64, Tuple{Vararg{Basis{T}}}, typeof(I)}(P, I::AbstractVector)
+SumSpace{T, F}(P, I::AbstractVector=[-1.,1.]) where {T, F} = SumSpace{T, F, typeof(I)}(P, I::AbstractVector)
+SumSpace{T}(P, I::AbstractVector=[-1.,1.]) where T = SumSpace{T, Tuple{Vararg{Basis{T}}}, typeof(I)}(P, I::AbstractVector)
 SumSpace(P) = SumSpace{Float64}(P)
 
 
-axes(S::SumSpace) = (Inclusion(ℝ), _BlockedUnitRange(length(S.P):length(S.P):∞))
+# axes(S::SumSpace) = (Inclusion(ℝ), _BlockedUnitRange(length(S.P):length(S.P):∞))
+axes(S::SumSpace) = (Inclusion(ℝ), OneToInf())
 ==(S::SumSpace, Z::SumSpace) = S.P == Z.P && S.I == Z.I
 
 """
