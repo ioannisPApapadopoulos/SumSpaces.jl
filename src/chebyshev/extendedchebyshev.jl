@@ -127,3 +127,47 @@ summary(io::IO, w::ExtendedWeightedChebyshevU{Float64}) = print(io, "ExtendedWei
     TT = eltype(M)
     ApplyArray(hvcat, 2, convert(TT,Inf), Zeros{TT}(1,∞), Zeros{TT}(∞), M)
 end
+
+######
+# Derivatives
+#####
+
+@simplify function *(D::Derivative, T̃::ExtendedChebyshevT)
+    T = promote_type(eltype(D),eltype(T̃))
+    D = BandedMatrix(-1=>zero(T):∞)
+    ExtendedChebyshevU{T}()*D
+end
+
+@simplify function *(D::Derivative, W::ExtendedWeightedChebyshevU)
+    T = promote_type(eltype(D),eltype(W))
+    D = BandedMatrix(-1=>-one(T):-one(T):∞)
+    ExtendedWeightedChebyshevT{T}()*D
+end
+
+#####
+# Conversion
+#####
+
+function \(Ũ::ExtendedChebyshevU, T̃::ExtendedChebyshevT)
+    T = promote_type(eltype(Ũ), eltype(T̃))
+    d = vcat(one(T), Fill(one(T)/2, ∞))
+    BandedMatrix(0=>-d, -2=>d)
+end
+
+function \(V::ExtendedWeightedChebyshevT, W::ExtendedWeightedChebyshevU)
+    T = promote_type(eltype(V), eltype(W))
+    d = Fill(one(T)/2, ∞)
+    BandedMatrix(0=>d, -2=>-d)
+end
+
+# function divmul(R::TwoBandJacobi, D::Derivative, HP::HalfWeighted{:ab,<:Any,<:TwoBandJacobi})
+#     T = promote_type(eltype(R), eltype(HP))
+#     ρ=convert(T,R.ρ); t=inv(one(T)-ρ^2)
+#     a,b,c = R.a,R.b,R.c
+
+#     Dₑ = -2*(one(T)-ρ^2) .* (R.Q \ (Derivative(axes(R.Q,1))*HalfWeighted{:ab}(HP.P.P)))
+#     D₀ = -2*(one(T)-ρ^2)^2 .* (Weighted(R.P) \ (Derivative(axes(R.P,1))*Weighted(HP.P.Q)))
+
+#     (dₑ, dlₑ, d₀, dl₀) = Dₑ.data[1,:], Dₑ.data[2,:], D₀.data[1,:], D₀.data[2,:]
+#     BandedMatrix(-1=>Interlace(dₑ, -d₀), -3=>Interlace(-dlₑ, dl₀))
+# end
