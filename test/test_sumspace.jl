@@ -29,7 +29,7 @@ import SumSpaces: affinetransform
 
     @testset "Interval Evaluation" begin
         V = ExtendedWeightedChebyshevT()
-        S = SumSpace((W, T̃[:, 2:∞], V), [-2., 1., 3., 5, 8.])
+        S = SumSpace{Float64, Tuple{typeof(W), typeof(T̃[:, 2:∞]), typeof(V)}}((W, T̃[:, 2:∞], V), [-2., 1., 3., 5, 8.])
         x = 0.1
         M = length(S.P); K = length(S.I)-1
         gap = M*K
