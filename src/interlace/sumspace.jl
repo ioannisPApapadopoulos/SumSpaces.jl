@@ -8,7 +8,7 @@ struct SumSpace{T, F, E} <: Basis{T}
     I::E
 end
 
-SumSpace(P, I) where T = SumSpace{Float64, Tuple{Vararg{Basis{T}}}, typeof(I)}(P, I::AbstractVector)
+# SumSpace(P, I) = SumSpace{Float64, Tuple{Vararg{Basis{Float64}}}, typeof(I)}(P, I::AbstractVector)
 SumSpace{T, F}(P, I::AbstractVector=[-1.,1.]) where {T, F} = SumSpace{T, F, typeof(I)}(P, I::AbstractVector)
 SumSpace{T}(P, I::AbstractVector=[-1.,1.]) where T = SumSpace{T, Tuple{Vararg{Basis{T}}}, typeof(I)}(P, I::AbstractVector)
 SumSpace(P) = SumSpace{Float64}(P)
