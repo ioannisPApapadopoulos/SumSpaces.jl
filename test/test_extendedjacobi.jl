@@ -1,5 +1,6 @@
 using Test, ClassicalOrthogonalPolynomials
 using SumSpaces
+import ForwardDiff: derivative
 
 @testset "ExtendedJacobi" begin
     
@@ -55,6 +56,25 @@ using SumSpaces
             x = [-5., -3.1, -1.1, 0.1, 0.8, 1.3, 5.7]
             @test ExtendedJacobi(0.5,0.5)[x, 1:20] .* wPU.(1:20)' ≈ ExtendedChebyshevU()[x, 3:22]
             @test ExtendedJacobi(-0.5,-0.5)[x, 2:21] .* wPT.(2:21)' ≈ ExtendedChebyshevT()[x, 2:21]
+        end
+
+        @testset "derivative" begin
+            xx = 3:0.1:3
+            for s in [-2/3, -1/3, 1/3, 2/3]
+                P = ExtendedJacobi(s,s)
+                Q = ExtendedWeightedJacobi(s,s)
+
+                x = axes(P,1)
+                ∂P = Derivative(x) * P
+                ∂Q = Derivative(x) * Q
+                ∂p(x, n) = derivative(x->ExtendedJacobi{eltype(x)}(s,s)[x, n], x)
+                ∂q(x, n) = derivative(x->ExtendedWeightedJacobi{eltype(x)}(s,s)[x, n], x)
+
+                for n = 1:10
+                    @test ∂p.(xx, n) ≈ ∂P[xx, n]
+                    @test ∂q.(xx, n) ≈ ∂Q[xx, n]
+                end
+            end
         end
     end
 
