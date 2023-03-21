@@ -15,7 +15,7 @@ SumSpace(P) = SumSpace{Float64}(P)
 
 
 # axes(S::SumSpace) = (Inclusion(ℝ), _BlockedUnitRange(length(S.P):length(S.P):∞))
-axes(S::SumSpace) = (Inclusion(ℝ), OneToInf())
+axes(S::SumSpace) = (Inclusion(axes(S.P[1],1)), OneToInf())
 ==(S::SumSpace, Z::SumSpace) = S.P == Z.P && S.I == Z.I
 
 """
@@ -37,6 +37,23 @@ function getindex(S::SumSpace{T}, x::Real, j::Int)::T where T
     m = j - M*K*(n-1) - M*(k-1)     # function number
 
     y = affinetransform(S.I[k],S.I[k+1], x)
+    if S.P[m] isa Function
+        S.P[m](y)[n]
+    else
+        S.P[m][y, n]
+    end
+end
+
+function getindex(S::SumSpace{T}, xy::StaticVector{2}, j::Int)::T where T
+    M = length(S.P)
+    K = length(S.I)-1
+    n = (j-1) ÷ (M*K) + 1           # polynomial degree
+    k = ((j- M*K*(n-1))-1) ÷ M + 1  # interval number
+    m = j - M*K*(n-1) - M*(k-1)     # function number
+
+    # y = affinetransform(S.I[k],S.I[k+1], x)
+    # TODO: get multiple "intervals" working.
+    y = xy
     if S.P[m] isa Function
         S.P[m](y)[n]
     else

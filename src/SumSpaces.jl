@@ -3,7 +3,7 @@ module SumSpaces
 using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays, 
     ClassicalOrthogonalPolynomials, StaticArrays, ContinuumArrays, DomainSets,
     FillArrays, LazyBandedMatrices, LazyArrays, FFTW, Interpolations, InfiniteArrays,
-    QuasiArrays, DelimitedFiles, HypergeometricFunctions, BandedMatrices
+    QuasiArrays, DelimitedFiles, HypergeometricFunctions, BandedMatrices, MultivariateOrthogonalPolynomials
 
 import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2, Derivative, jacobimatrix, @simplify, HalfLine, Weight, orthogonalityweight, recurrencecoefficients
 import Base: in, axes, getindex, ==, oneto, *, \, +, -, convert, broadcasted
@@ -26,6 +26,7 @@ include("interlace/sumspace.jl")
 include("laguerre/hilbertlaguerre.jl")
 include("laguerre/sumspace.jl")
 include("hermite/extendedhermite.jl")
+include("zernike/extendedzernike.jl")
 
 export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill, Weighted, AbsLaplacianPower,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
@@ -34,6 +35,7 @@ export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill, Weighted, AbsL
         ExtendedJacobi, ExtendedWeightedJacobi, DerivativeExtendedJacobi, DerivativeExtendedWeightedJacobi, SumSpaceJacobi, SumSpaceJacobiP, SumSpaceJacobiD,
         ExtendedWeightedLaguerre, HilbertWeightedLaguerre,
         ExtendedHermite,
+        ExtendedZernike, ExtendedWeightedZernike,
         SumSpaceL, SumSpaceLD,
         solvesvd, collocation_points, riemann, evaluate, framematrix, riemannf, riemannT, riemannTf,
         supporter_functions, fft_supporter_functions, interpolate_supporter_functions, coefficient_supporter_functions, inverse_fourier_transform, load_supporter_functions, save_supporter_functions
