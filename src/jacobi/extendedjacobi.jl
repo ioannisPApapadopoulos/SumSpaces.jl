@@ -32,6 +32,10 @@ function getindex(P::ExtendedJacobi{T}, x::Real, j::Int)::T where T
     end
     s = a
     if isodd(j)
+        if j == 1 && s ≈ -0.5
+            # @warn "degree 0 when s = -1/2 is undefined."
+            return one(T)
+        end
         n = Int((j-1)/2)
         c = -Jacobi{T}(s, s)[1,j] * sin(π*(n + s)) * gamma(2n+2s+1) * gamma(n + 1/2)
         k = 4^s * gamma(s+n+1/2) * Jacobi{T}(s, -1/2)[1,n+1] * sqrt(π) * (-4)^n * gamma(2n+s+3/2)
@@ -149,4 +153,27 @@ end
 
 @simplify function *(D::Derivative, P::ExtendedWeightedJacobi)
     DerivativeExtendedWeightedJacobi(P.a, P.b)
+end
+
+###
+# Fractional Laplacians
+###
+
+function _coeff(s, nstart)
+    n = 0:∞
+    cₒ = 4^s .* gamma.(1 .+ s .+ n).*gamma.(s .+ 3/2 .+ n) ./ (gamma.(1 .+ n) .* gamma.(n .+ 3/2))
+    cₑ = 4^s .* gamma.(1 .+ s .+ n).*gamma.(s .+ 1/2 .+ n) ./ (gamma.(1 .+ n) .* gamma.(n .+ 1/2))
+    Interlace(cₑ, cₒ)[nstart:end]
+end
+
+function *(L::AbsLaplacianPower, P::ExtendedJacobi{T}) where T
+    @assert axes(L,1) == axes(P,1) && P.a == P.b == -L.α
+    s = P.a
+    ExtendedWeightedJacobi{T}(s,s) .* (one(T) ./ _coeff(s, 1))'
+end
+
+function *(L::AbsLaplacianPower, Q::ExtendedWeightedJacobi{T}) where T
+    @assert axes(L,1) == axes(Q,1) && Q.a == Q.b == L.α
+    s = Q.a
+    ExtendedJacobi{T}(s, s) .* _coeff(s, 1)'
 end

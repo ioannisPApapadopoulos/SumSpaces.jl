@@ -13,6 +13,7 @@ import BlockArrays: block, blockindex, Block, _BlockedUnitRange#, BlockSlice
 import BlockBandedMatrices: _BandedBlockBandedMatrix
 import LazyBandedMatrices: Tridiagonal
 import SemiclassicalOrthogonalPolynomials: Interlace
+import HarmonicOrthogonalPolynomials: AbsLaplacianPower
 
 include("chebyshev/extendedchebyshev.jl")
 include("chebyshev/sumspace.jl")
@@ -26,7 +27,7 @@ include("laguerre/hilbertlaguerre.jl")
 include("laguerre/sumspace.jl")
 include("hermite/extendedhermite.jl")
 
-export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill, Weighted,
+export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill, Weighted, AbsLaplacianPower,
         ExtendedChebyshev, ExtendedChebyshevT, ExtendedChebyshevU, extendedchebyshevt, ExtendedWeightedChebyshevT, ExtendedWeightedChebyshevU,
         SumSpace, SumSpaceP, SumSpaceD, AppendedSumSpace, jacobimatrix,
         ElementSumSpace, ElementSumSpaceP, ElementSumSpaceD, ElementAppendedSumSpace, coefficient_interlace, coefficient_stack,
