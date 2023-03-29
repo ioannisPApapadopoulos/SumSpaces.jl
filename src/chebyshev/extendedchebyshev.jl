@@ -171,3 +171,18 @@ end
 #     (dₑ, dlₑ, d₀, dl₀) = Dₑ.data[1,:], Dₑ.data[2,:], D₀.data[1,:], D₀.data[2,:]
 #     BandedMatrix(-1=>Interlace(dₑ, -d₀), -3=>Interlace(-dlₑ, dl₀))
 # end
+
+
+###
+# Fractional Laplacians
+###
+
+function *(L::AbsLaplacianPower, T̃::ExtendedChebyshevT{T}) where T
+    @assert axes(L,1) == axes(T̃,1) && L.α ≈ 1/2
+    ExtendedWeightedChebyshevT(){T} .*(0:∞)'
+end
+
+function *(L::AbsLaplacianPower, W::ExtendedWeightedChebyshevU{T}) where T
+    @assert axes(L,1) == axes(W,1) && L.α ≈ 1/2
+    ExtendedChebyhsevU{T}()[:, 3:∞] .*(1:∞)'
+end

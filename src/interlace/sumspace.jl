@@ -15,7 +15,13 @@ SumSpace(P) = SumSpace{Float64}(P)
 
 
 # axes(S::SumSpace) = (Inclusion(ℝ), _BlockedUnitRange(length(S.P):length(S.P):∞))
-axes(S::SumSpace) = (Inclusion(axes(S.P[1],1)), OneToInf())
+function axes(S::SumSpace)  
+    try
+        return (Inclusion(axes(S.P[1],1)), OneToInf())
+    catch
+        return (Inclusion(ℝ), OneToInf())
+    end
+end
 ==(S::SumSpace, Z::SumSpace) = S.P == Z.P && S.I == Z.I
 
 """
