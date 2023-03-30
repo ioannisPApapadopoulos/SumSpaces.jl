@@ -102,7 +102,9 @@ function getindex(P::DerivativeExtendedJacobi{T}, x::Real, j::Int)::T where T
         error("a ≂̸ b, not implemented for different Jacobi parameters.")
     end
     s = a
-    if isodd(j)
+    if j==1 && s ≈ -1/2
+        return zero(T)
+    elseif isodd(j)
         n = Int((j-1)/2)
         c = -Jacobi{T}(s, s)[1,j] * sin(π*(n + s)) * gamma(2n+2s+1) * gamma(n + 1/2)
         k = 4^s * gamma(s+n+1/2) * Jacobi{T}(s, -1/2)[1,n+1] * sqrt(π) * (-4)^n * gamma(2n+s+3/2)
