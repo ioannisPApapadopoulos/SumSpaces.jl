@@ -74,6 +74,9 @@ function getindex(H::ExtendedChebyshevU{T}, x::Real, j::Int)::T where T
     return ξ
 end
 
+recurrencecoefficients(P::ExtendedChebyshevT) where T = recurrencecoefficients(ChebyshevT())
+recurrencecoefficients(P::ExtendedChebyshevU) where T = recurrencecoefficients(ChebyshevU())
+
 struct ExtendedWeightedChebyshev{kind,T} <: Basis{T} end
 ExtendedWeightedChebyshev{kind}() where kind = ExtendedWeightedChebyshev{kind,Float64}()
 
@@ -109,6 +112,8 @@ summary(io::IO, w::ExtendedWeightedChebyshevU{Float64}) = print(io, "ExtendedWei
 ==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevU) = true
 ==(a::ExtendedWeightedChebyshevU, b::ExtendedWeightedChebyshevT) = false
 
+recurrencecoefficients(wT::ExtendedWeightedChebyshevT) where T = recurrencecoefficients(ChebyshevT())
+recurrencecoefficients(wU::ExtendedWeightedChebyshevU) where T = recurrencecoefficients(ChebyshevU())
 
 ###
 # inner products
@@ -179,10 +184,10 @@ end
 
 function *(L::AbsLaplacianPower, T̃::ExtendedChebyshevT{T}) where T
     @assert axes(L,1) == axes(T̃,1) && L.α ≈ 1/2
-    ExtendedWeightedChebyshevT(){T} .*(0:∞)'
+    ExtendedWeightedChebyshevT{T}() .*(0:∞)'
 end
 
 function *(L::AbsLaplacianPower, W::ExtendedWeightedChebyshevU{T}) where T
     @assert axes(L,1) == axes(W,1) && L.α ≈ 1/2
-    ExtendedChebyhsevU{T}()[:, 3:∞] .*(1:∞)'
+    ExtendedChebyshevU{T}()[:, 3:∞] .*(1:∞)'
 end

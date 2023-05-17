@@ -50,6 +50,8 @@ function getindex(P::ExtendedJacobi{T}, x::Real, j::Int)::T where T
     end
 end
 
+recurrencecoefficients(P::ExtendedJacobi{T}) where T = recurrencecoefficients(Jacobi{T}(P.a, P.b))
+
 #### 
 # ExtendedWeightedJacobi
 ####
@@ -71,6 +73,8 @@ function getindex(P::ExtendedWeightedJacobi{T}, x::Real, j::Int)::T where T
     x in ChebyshevInterval() && return Weighted(Jacobi{T}(P.a, P.b))[x,j]
     return 0.
 end
+
+recurrencecoefficients(P::ExtendedWeightedJacobi{T}) where T = recurrencecoefficients(Jacobi{T}(P.a, P.b))
 
 ###
 # Derivative of ExtendedJacobi
@@ -158,6 +162,83 @@ end
 end
 
 ###
+# Generalised Extended Jacobi
+###
+struct GeneralExtendedJacobi{T} <: Basis{T}
+    a::T
+    s::T
+    GeneralExtendedJacobi{T}(a, s) where T = new{T}(convert(T,a), convert(T,s))
+end
+
+GeneralExtendedJacobi(a::T, s::T) where T = GeneralExtendedJacobi{Float64}(a::T, s::T)
+
+axes(P::GeneralExtendedJacobi) = (Inclusion(ℝ), OneToInf())
+
+==(P::GeneralExtendedJacobi, Q::GeneralExtendedJacobi) = P.a == Q.a && P.s == Q.s
+
+function getindex(P::GeneralExtendedJacobi{T}, x::Real, j::Int)::T where T
+    a, s = convert(T,P.a), convert(T, P.s)
+    a == s && return ExtendedJacobi{T}(s, s)[x, j]
+    n = j-1
+    a,s,n = map(big, (a,s,n))
+    if x in ChebyshevInterval()
+        # return Jacobi{T}(a, b)[x,j]
+        # return ( 
+        #     convert(T,π) * (_₂F₁(-a+s-Int(floor(n/2)),T(1)/2+n+s-Int(floor(n/2)),T(1)/2+n-2*Int(floor(n/2)),x^2)
+        #     /(gamma(T(1)+a-s+Int(floor(n/2)))*gamma(T(1)/2-n-s+Int(floor(n/2)))) 
+        #     - ((x^2)^(T(1)/2-n-s+2*Int(floor(n/2)))
+        #     *_₃F₂(T(1),T(1)+Int(floor(n/2)),T(1)/2-a-n+Int(floor(n/2)),T(1)-s,T(3)/2-n-s+2*Int(floor(n/2)),x^2))
+        #     /(gamma(T(1)/2+a+n-Int(floor(n/2)))*gamma(-Int(floor(n/2)))*gamma(T(1)-s)*gamma(T(3)/2-n-s+2*Int(floor(n/2)))))
+        #     *sec(convert(T,π)*(n+s-2*Int(floor(n/2))))
+        #     )
+
+
+            t1 = π*_₂F₁general2(-a+s-floor(n/2), 1/2+n+s-floor(n/2), 1/2+n-2floor(n/2), x^2)*sec(n*π + π*s - 2π*floor(n/2))
+            t2 = gamma(1/2+n-2floor(n/2))*gamma(1+a-s+floor(n/2))*gamma(1/2-n-s+floor(n/2))
+            term1 = t1/t2
+            
+            t1 = π*(x^2)^(1/2-n-s+2floor(n/2))*_₃F₂(1.0,1+floor(n/2),1-a-n+floor(n/2),1-s,3/2-n-s+2floor(n/2),-x^2)*sec(n*π + π*s - 2π*floor(n/2))
+            t2 = gamma(1-s)*gamma(1/2+a+n-floor(n/2))*gamma(-floor(n/2))*gamma(3/2-n-s+2floor(n/2))
+            term2 = t1/t2
+            
+            (1/gamma(1+n))*(4^s)*(x^(n-2floor(n/2)))*gamma(1+a+n)*(term1 - term2)
+
+            # (1/Gamma[1 + n])(4^s) (x^(n - 2 Floor[n/2])) Gamma[1 + a + n] 
+            # (\[Pi] Hypergeometric2F1[-a + s - Floor[n/2], 
+                # 1/2 + n + s - Floor[n/2], 1/2 + n - 2 Floor[n/2], x^2] Sec[
+                #     n \[Pi] + \[Pi] s - 2 \[Pi] Floor[n/2]])/(
+                # Gamma[1/2 + n - 2 Floor[n/2]] Gamma[1 + a - s + Floor[n/2]] Gamma[
+                #     1/2 - n - s + Floor[n/2]]) - (\[Pi] (x^2)^(
+                # 1/2 - n - s + 2 Floor[n/2])
+                #     HypergeometricPFQ[{1, 1 + Floor[n/2], 
+                #     1/2 - a - n + Floor[n/2]}, {1 - s, 3/2 - n - s + 2 Floor[n/2]}, 
+                #     x^2] Sec[n \[Pi] + \[Pi] s - 2 \[Pi] Floor[n/2]])/(
+                # Gamma[1 - s] Gamma[
+                #     1/2 + a + n - Floor[n/2]] Gamma[-Floor[n/2]] Gamma[
+                #     3/2 - n - s + 2 Floor[n/2]])
+    else
+        # return (
+        #     (T(1)/gamma(-s))*(x^2)^(-(T(1)/2)-n-s+2*Int(floor(n/2)))
+        #     *gamma(T(1)/2+n+s-2*Int(floor(n/2)))
+        #     *_₃F₂(T(1),T(1)+s,T(1)/2+n+s-2*Int(floor(n/2)),T(1)-Int(floor(n/2)),T(3)/2+a+n-Int(floor(n/2)),T(1)/x^2)
+        #     /(gamma(T(1)-Int(floor(n/2)))*gamma(T(3)/2+a+n-Int(floor(n/2))))
+        #     )
+
+            t1 = ((x^2)^(-(1/2) - n - s + 2floor(n/2))*
+            gamma(1/2+n+s-2floor(n/2))*
+            _₃F₂(1,1+s,1/2+n+s-2floor(n/2), 1-floor(n/2),3/2+a+n-floor(n/2),1/x^2))/
+            (gamma(-s)*gamma(1-floor(n/2))*gamma(3/2+a+n-floor(n/2)))
+
+            (1/gamma(1+n))*(4^s)*(x^(n-2floor(n/2)))*gamma(1+a+n)*t1
+            #    (1/Gamma[-s])(x^2)^(-(1/2) - n - s + 2 Floor[n/2])
+            #   Gamma[1/2 + n + s - 2 Floor[n/2]] HypergeometricPFQRegularized[{1, 
+            #    1 + s, 1/2 + n + s - 2 Floor[n/2]}, {1 - Floor[n/2], 
+            #    3/2 + a + n - Floor[n/2]}, 1/x^2]
+    end
+
+end
+
+###
 # Fractional Laplacians
 ###
 
@@ -181,56 +262,9 @@ function *(L::AbsLaplacianPower, Q::ExtendedWeightedJacobi{T}) where T
     Q.a == Q.b && return GeneralExtendedJacobi{T}(Q.a, L.α)
 end
 
-###
-# Generalised Extended Jacobi
-###
-struct GeneralExtendedJacobi{T} <: Basis{T}
-    a::T
-    s::T
-    GeneralExtendedJacobi{T}(a, s) where T = new{T}(convert(T,a), convert(T,s))
-end
+function *(L::AbsLaplacianPower, G::GeneralExtendedJacobi{T}) where T
+    @assert axes(L,1) == axes(G,1)
 
-GeneralExtendedJacobi(a::T, s::T) where T = GeneralExtendedJacobi{Float64}(a::T, s::T)
-
-axes(P::GeneralExtendedJacobi) = (Inclusion(ℝ), OneToInf())
-
-==(P::GeneralExtendedJacobi, Q::GeneralExtendedJacobi) = P.a == Q.a && P.s == Q.s
-
-function getindex(P::GeneralExtendedJacobi{T}, x::Real, j::Int)::T where T
-    a, s = convert(T,P.a), convert(T, P.s)
-    a == s && return ExtendedJacobi{T}(s, s)[x, j]
-    n = j-1
-    if x in ChebyshevInterval()
-        # return Jacobi{T}(a, b)[x,j]
-        return ( 
-            convert(T,π) * (_₂F₁(-a+s-Int(floor(n/2)),T(1)/2+n+s-Int(floor(n/2)),T(1)/2+n-2*Int(floor(n/2)),x^2)
-            /(gamma(T(1)+a-s+Int(floor(n/2)))*gamma(T(1)/2-n-s+Int(floor(n/2)))) 
-            - ((x^2)^(T(1)/2-n-s+2*Int(floor(n/2)))
-            *_₃F₂(T(1),T(1)+Int(floor(n/2)),T(1)/2-a-n+Int(floor(n/2)),T(1)-s,T(3)/2-n-s+2*Int(floor(n/2)),x^2))
-            /(gamma(T(1)/2+a+n-Int(floor(n/2)))*gamma(-Int(floor(n/2)))*gamma(T(1)-s)*gamma(T(3)/2-n-s+2*Int(floor(n/2)))))
-            *sec(convert(T,π)*(n+s-2*Int(floor(n/2))))
-            )
-            #     \[Pi] (Hypergeometric2F1Regularized[-a + s - Floor[n/2], 
-            #  1/2 + n + s - Floor[n/2], 1/2 + n - 2 Floor[n/2], 
-            #  x^2]/(Gamma[1 + a - s + Floor[n/2]] Gamma[
-            #    1/2 - n - s + Floor[n/2]]) - ((x^2)^(
-            #   1/2 - n - s + 2 Floor[n/2])
-            #    HypergeometricPFQRegularized[{1, 1 + Floor[n/2], 
-            #     1/2 - a - n + Floor[n/2]}, {1 - s, 
-            #     3/2 - n - s + 2 Floor[n/2]}, x^2])/(Gamma[
-            #    1/2 + a + n - Floor[n/2]] Gamma[-Floor[n/2]])) Sec[\[Pi] (n + 
-            #  s - 2 Floor[n/2])]
-    else
-        return (
-            (T(1)/gamma(-s))*(x^2)^(-(T(1)/2)-n-s+2*Int(floor(n/2)))
-            *gamma(T(1)/2+n+s-2*Int(floor(n/2)))
-            *_₃F₂(T(1),T(1)+s,T(1)/2+n+s-2*Int(floor(n/2)),T(1)-Int(floor(n/2)),T(3)/2+a+n-Int(floor(n/2)),T(1)/x^2)
-            /(gamma(T(1)-Int(floor(n/2)))*gamma(T(3)/2+a+n-Int(floor(n/2))))
-            )
-            #    (1/Gamma[-s])(x^2)^(-(1/2) - n - s + 2 Floor[n/2])
-            #   Gamma[1/2 + n + s - 2 Floor[n/2]] HypergeometricPFQRegularized[{1, 
-            #    1 + s, 1/2 + n + s - 2 Floor[n/2]}, {1 - Floor[n/2], 
-            #    3/2 + a + n - Floor[n/2]}, 1/x^2]
-    end
-
+    @assert L.α == -G.s
+    return ExtendedWeightedJacobi{T}(G.a, G.a)
 end

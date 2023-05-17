@@ -50,6 +50,21 @@ function getindex(S::SumSpace{T}, x::Real, j::Int)::T where T
     end
 end
 
+function assemble(S::SumSpace{T}, x::AbstractArray, j::Int)::T where T
+    M = length(S.P)
+    K = length(S.I)-1
+    n = (j-1) ÷ (M*K) + 1           # polynomial degree
+    k = ((j- M*K*(n-1))-1) ÷ M + 1  # interval number
+    m = j - M*K*(n-1) - M*(k-1)     # function number
+
+    y = affinetransform(S.I[k],S.I[k+1], x)
+    if S.P[m] isa Function
+        S.P[m](y)[n]
+    else
+        S.P[m][y, n]
+    end
+end
+
 function getindex(S::SumSpace{T}, xy::StaticVector{2}, j::Int)::T where T
     M = length(S.P)
     K = length(S.I)-1

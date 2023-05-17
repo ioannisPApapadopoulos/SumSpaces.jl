@@ -3,9 +3,11 @@ module SumSpaces
 using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays, 
     ClassicalOrthogonalPolynomials, StaticArrays, ContinuumArrays, DomainSets,
     FillArrays, LazyBandedMatrices, LazyArrays, FFTW, Interpolations, InfiniteArrays,
-    QuasiArrays, DelimitedFiles, HypergeometricFunctions, BandedMatrices, MultivariateOrthogonalPolynomials
+    QuasiArrays, DelimitedFiles, HypergeometricFunctions, BandedMatrices, MultivariateOrthogonalPolynomials,
+    SingularIntegrals
 
-import ClassicalOrthogonalPolynomials: Hilbert, ∞, sqrtx2, Derivative, jacobimatrix, @simplify, HalfLine, Weight, orthogonalityweight, recurrencecoefficients
+import ClassicalOrthogonalPolynomials: ∞, Derivative, jacobimatrix, @simplify, HalfLine, Weight, orthogonalityweight, recurrencecoefficients
+import SingularIntegrals: sqrtx2, Hilbert, RecurrenceArray
 import Base: in, axes, getindex, ==, oneto, *, \, +, -, convert, broadcasted
 import ContinuumArrays: Basis, AbstractQuasiArray
 import InfiniteArrays: OneToInf
@@ -14,6 +16,7 @@ import BlockBandedMatrices: _BandedBlockBandedMatrix
 import LazyBandedMatrices: Tridiagonal
 import SemiclassicalOrthogonalPolynomials: Interlace
 import HarmonicOrthogonalPolynomials: AbsLaplacianPower
+import HypergeometricFunctions: _₂F₁general2
 
 include("chebyshev/extendedchebyshev.jl")
 include("chebyshev/sumspace.jl")
