@@ -28,6 +28,7 @@ include("cft/cft.jl")
 include("interlace/sumspace.jl")
 include("laguerre/hilbertlaguerre.jl")
 include("laguerre/sumspace.jl")
+include("laguerre/symmetriclaguerre.jl")
 include("hermite/extendedhermite.jl")
 include("zernike/extendedzernike.jl")
 
@@ -39,6 +40,7 @@ export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill, Weighted, AbsL
         SumSpaceJacobi, SumSpaceJacobiP, SumSpaceJacobiD,
         ExtendedWeightedLaguerre, HilbertWeightedLaguerre,
         ExtendedHermite,
+        SymmetricLaguerre, ExtendedSymmetricLaguerre, SymmetricLaguerreWeight,
         ExtendedZernike, ExtendedWeightedZernike,
         SumSpaceL, SumSpaceLD,
         solvesvd, collocation_points, riemann, evaluate, framematrix, riemannf, riemannT, riemannTf,

@@ -177,65 +177,27 @@ axes(P::GeneralExtendedJacobi) = (Inclusion(ℝ), OneToInf())
 ==(P::GeneralExtendedJacobi, Q::GeneralExtendedJacobi) = P.a == Q.a && P.s == Q.s
 
 function getindex(P::GeneralExtendedJacobi{T}, x::Real, j::Int)::T where T
-    a, s = convert(T,P.a), convert(T, P.s)
+    a, s = convert(T, P.a), convert(T, P.s)
     a == s && return ExtendedJacobi{T}(s, s)[x, j]
     n = j-1
     a,s,n = map(big, (a,s,n))
+    c = 4^s * gamma(a + n + 1) / factorial(n) * x^(n - 2 * floor(n/2))
     if x in ChebyshevInterval()
-        # return Jacobi{T}(a, b)[x,j]
-        # return ( 
-        #     convert(T,π) * (_₂F₁(-a+s-Int(floor(n/2)),T(1)/2+n+s-Int(floor(n/2)),T(1)/2+n-2*Int(floor(n/2)),x^2)
-        #     /(gamma(T(1)+a-s+Int(floor(n/2)))*gamma(T(1)/2-n-s+Int(floor(n/2)))) 
-        #     - ((x^2)^(T(1)/2-n-s+2*Int(floor(n/2)))
-        #     *_₃F₂(T(1),T(1)+Int(floor(n/2)),T(1)/2-a-n+Int(floor(n/2)),T(1)-s,T(3)/2-n-s+2*Int(floor(n/2)),x^2))
-        #     /(gamma(T(1)/2+a+n-Int(floor(n/2)))*gamma(-Int(floor(n/2)))*gamma(T(1)-s)*gamma(T(3)/2-n-s+2*Int(floor(n/2)))))
-        #     *sec(convert(T,π)*(n+s-2*Int(floor(n/2))))
-        #     )
-
-
-            t1 = π*_₂F₁general2(-a+s-floor(n/2), 1/2+n+s-floor(n/2), 1/2+n-2floor(n/2), x^2)*sec(n*π + π*s - 2π*floor(n/2))
-            t2 = gamma(1/2+n-2floor(n/2))*gamma(1+a-s+floor(n/2))*gamma(1/2-n-s+floor(n/2))
-            term1 = t1/t2
-            
-            t1 = π*(x^2)^(1/2-n-s+2floor(n/2))*_₃F₂(1.0,1+floor(n/2),1-a-n+floor(n/2),1-s,3/2-n-s+2floor(n/2),-x^2)*sec(n*π + π*s - 2π*floor(n/2))
-            t2 = gamma(1-s)*gamma(1/2+a+n-floor(n/2))*gamma(-floor(n/2))*gamma(3/2-n-s+2floor(n/2))
-            term2 = t1/t2
-            
-            (1/gamma(1+n))*(4^s)*(x^(n-2floor(n/2)))*gamma(1+a+n)*(term1 - term2)
-
-            # (1/Gamma[1 + n])(4^s) (x^(n - 2 Floor[n/2])) Gamma[1 + a + n] 
-            # (\[Pi] Hypergeometric2F1[-a + s - Floor[n/2], 
-                # 1/2 + n + s - Floor[n/2], 1/2 + n - 2 Floor[n/2], x^2] Sec[
-                #     n \[Pi] + \[Pi] s - 2 \[Pi] Floor[n/2]])/(
-                # Gamma[1/2 + n - 2 Floor[n/2]] Gamma[1 + a - s + Floor[n/2]] Gamma[
-                #     1/2 - n - s + Floor[n/2]]) - (\[Pi] (x^2)^(
-                # 1/2 - n - s + 2 Floor[n/2])
-                #     HypergeometricPFQ[{1, 1 + Floor[n/2], 
-                #     1/2 - a - n + Floor[n/2]}, {1 - s, 3/2 - n - s + 2 Floor[n/2]}, 
-                #     x^2] Sec[n \[Pi] + \[Pi] s - 2 \[Pi] Floor[n/2]])/(
-                # Gamma[1 - s] Gamma[
-                #     1/2 + a + n - Floor[n/2]] Gamma[-Floor[n/2]] Gamma[
-                #     3/2 - n - s + 2 Floor[n/2]])
+        num = π * _₂F₁(-a + s - floor(n/2), n + s - floor(n/2) + 1/2, n - 2 * floor(n/2) + 1/2, x^2)
+        den = sin(π/2 * (1 - 2 * n - 2 * s + 4 * floor(n/2))) *
+              gamma(n - 2 * floor(n/2) + 1/2) *
+              gamma(-n - s + floor(n/2) + 1/2) *
+              gamma(a - s + floor(n/2) + 1)
+        return c*num/den
     else
-        # return (
-        #     (T(1)/gamma(-s))*(x^2)^(-(T(1)/2)-n-s+2*Int(floor(n/2)))
-        #     *gamma(T(1)/2+n+s-2*Int(floor(n/2)))
-        #     *_₃F₂(T(1),T(1)+s,T(1)/2+n+s-2*Int(floor(n/2)),T(1)-Int(floor(n/2)),T(3)/2+a+n-Int(floor(n/2)),T(1)/x^2)
-        #     /(gamma(T(1)-Int(floor(n/2)))*gamma(T(3)/2+a+n-Int(floor(n/2))))
-        #     )
-
-            t1 = ((x^2)^(-(1/2) - n - s + 2floor(n/2))*
-            gamma(1/2+n+s-2floor(n/2))*
-            _₃F₂(1,1+s,1/2+n+s-2floor(n/2), 1-floor(n/2),3/2+a+n-floor(n/2),1/x^2))/
-            (gamma(-s)*gamma(1-floor(n/2))*gamma(3/2+a+n-floor(n/2)))
-
-            (1/gamma(1+n))*(4^s)*(x^(n-2floor(n/2)))*gamma(1+a+n)*t1
-            #    (1/Gamma[-s])(x^2)^(-(1/2) - n - s + 2 Floor[n/2])
-            #   Gamma[1/2 + n + s - 2 Floor[n/2]] HypergeometricPFQRegularized[{1, 
-            #    1 + s, 1/2 + n + s - 2 Floor[n/2]}, {1 - Floor[n/2], 
-            #    3/2 + a + n - Floor[n/2]}, 1/x^2]
+        num = (2^(-n - 2 * s) * abs(x)^(-2 * floor((n - 1)/2) - 3 - 2 * s) *
+            gamma(n + 1 + 2 * s) *
+            _₂F₁(1 + floor(n/2) + s, (2 * floor((n - 1)/2) + 3)/2 + s, (2 * n + 3)/2 + a, 1 / x^2) *
+            sin(π * s))
+ 
+        den = sqrt(π) * gamma((2 * n + 3)/2 + a)
+        return -c*num/den
     end
-
 end
 
 ###
