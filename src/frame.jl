@@ -128,3 +128,15 @@ end
 function framematrix(x::AbstractVector, eU::ExtendedChebyshevU, Nn::Int; normtype::Function=riemann)
     return normtype(x, x->eU[x, 1:Nn])
 end
+
+# This framematrix is specifically for the interlacing sumspace. It evaluates
+# the entries just for the interval -1..1 and then scales to capture the
+# rest of the intervals. Should provide a speedup.
+# function framematrix(x::AbstractVector, S::SumSpace, Nn::Int)
+#     T = eltype(S)
+#     K = length(S.I)-1; N = length(S.P); deg = Nn ÷ (K*N);
+#     vals = zeros(length(x),N);
+#     for j in 1:N
+#         vals[:,j] = S.P[j][x, 1:deg]
+#     end
+# end

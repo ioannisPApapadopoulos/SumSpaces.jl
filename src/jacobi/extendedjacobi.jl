@@ -176,27 +176,47 @@ axes(P::GeneralExtendedJacobi) = (Inclusion(ℝ), OneToInf())
 
 ==(P::GeneralExtendedJacobi, Q::GeneralExtendedJacobi) = P.a == Q.a && P.s == Q.s
 
+function _coeffn(s::T, n::Int) where T
+    m = n ÷ 2
+    if iseven(n)
+        return 4^s * gamma(T(1) + s + m)*gamma(s + T(1)/2 + m) / (gamma(T(1) + m) * gamma(m + T(1)/2))
+    else
+        return 4^s * gamma(T(1) + s + m)*gamma(s + T(3)/2 + m) / (gamma(T(1) + m) * gamma(m + T(3)/2))
+    end
+end
+
 function getindex(P::GeneralExtendedJacobi{T}, x::Real, j::Int)::T where T
     a, s = convert(T, P.a), convert(T, P.s)
-    a == s && return ExtendedJacobi{T}(s, s)[x, j]
     n = j-1
-    a,s,n = map(big, (a,s,n))
-    c = 4^s * gamma(a + n + 1) / factorial(n) * x^(n - 2 * floor(n/2))
-    if x in ChebyshevInterval()
-        num = π * _₂F₁(-a + s - floor(n/2), n + s - floor(n/2) + 1/2, n - 2 * floor(n/2) + 1/2, x^2)
-        den = sin(π/2 * (1 - 2 * n - 2 * s + 4 * floor(n/2))) *
-              gamma(n - 2 * floor(n/2) + 1/2) *
-              gamma(-n - s + floor(n/2) + 1/2) *
-              gamma(a - s + floor(n/2) + 1)
-        return c*num/den
+    a == s && return _coeffn(s, n) * ExtendedJacobi{T}(s, s)[x, j]
+    # a,s,n = map(big, (a,s,n))
+    bn = n > 20 ? big(n) : n
+    c = 4^s * gamma(a + n + 1) / factorial(bn) * x^(n - 2 * floor(n/2))
+    bπ = convert(T,π)
+
+    if s ≈ 0.5
+        if x in ChebyshevInterval()
+            return c*((-T(1))^(floor(n/2)) * factorial(floor((n + 1)/2)) * _₂F₁(-a + T(1)/2 - floor(n/2), n - floor(n/2) + T(1), n - 2*floor(n/2) + T(1)/2, x^2) / (gamma(n - 2*floor(n/2) + T(1)/2) * gamma(a + floor(n/2) + T(1)/2)))
+        else
+            return c*((-T(2)^(-n - 1) * abs(x)^(-2*floor((n - 1)/2) - 4) * gamma(n + 2) * _₂F₁(T(3)/2 + floor(n/2), (2 * floor((n - 1)/2) + T(3))/2 + T(1)/2, (2n + 3)/2 + a, T(1)/x^2) * sin(bπ/2)) / (sqrt(bπ) * gamma((2n + T(3))/2 + a)))
+        end
     else
-        num = (2^(-n - 2 * s) * abs(x)^(-2 * floor((n - 1)/2) - 3 - 2 * s) *
-            gamma(n + 1 + 2 * s) *
-            _₂F₁(1 + floor(n/2) + s, (2 * floor((n - 1)/2) + 3)/2 + s, (2 * n + 3)/2 + a, 1 / x^2) *
-            sin(π * s))
- 
-        den = sqrt(π) * gamma((2 * n + 3)/2 + a)
-        return -c*num/den
+        if x in ChebyshevInterval()
+            num = bπ * _₂F₁(-a + s - floor(n/2), n + s - floor(n/2) + T(1)/2, n - 2 * floor(n/2) + T(1)/2, x^2)
+            den = sin(bπ/2 * (T(1) - 2 * n - 2 * s + 4 * floor(n/2))) *
+                gamma(n - 2 * floor(n/2) + T(1)/2) *
+                gamma(-n - s + floor(n/2) + T(1)/2) *
+                gamma(a - s + floor(n/2) + T(1))
+            return c*num/den
+        else
+            num = (2^(-n - 2 * s) * abs(x)^(-2 * floor((n - 1)/2) - 3 - 2 * s) *
+                gamma(n + T(1) + 2 * s) *
+                _₂F₁(T(1) + floor(n/2) + s, (2 * floor((n - 1)/2) + 3)/2 + s, (2 * n + T(3))/2 + a, T(1) / x^2) *
+                sin(bπ * s))
+    
+            den = sqrt(bπ) * gamma((2 * n + T(3))/2 + a)
+            return -c*num/den
+        end
     end
 end
 

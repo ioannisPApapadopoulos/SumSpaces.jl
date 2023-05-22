@@ -39,7 +39,7 @@ export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill, Weighted, AbsL
         ExtendedJacobi, ExtendedWeightedJacobi, DerivativeExtendedJacobi, DerivativeExtendedWeightedJacobi, GeneralExtendedJacobi, 
         SumSpaceJacobi, SumSpaceJacobiP, SumSpaceJacobiD,
         ExtendedWeightedLaguerre, HilbertWeightedLaguerre,
-        ExtendedHermite,
+        ExtendedHermite, ExtendedNormalizedHermite,
         SymmetricLaguerre, ExtendedSymmetricLaguerre, SymmetricLaguerreWeight,
         ExtendedZernike, ExtendedWeightedZernike,
         SumSpaceL, SumSpaceLD,
