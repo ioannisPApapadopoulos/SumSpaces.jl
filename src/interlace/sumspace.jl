@@ -72,12 +72,18 @@ function getindex(S::SumSpace{T}, xy::StaticVector{2}, j::Int)::T where T
     k = ((j- M*K*(n-1))-1) ÷ M + 1  # interval number
     m = j - M*K*(n-1) - M*(k-1)     # function number
 
+    # @assert S.P[m] isa ExtendedZernike || S.P[m] isa ExtendedWeightedZernike
+
     # y = affinetransform(S.I[k],S.I[k+1], x)
     # TODO: get multiple "intervals" working.
-    y = xy
-    if S.P[m] isa Function
-        S.P[m](y)[n]
-    else
-        S.P[m][y, n]
-    end
+    # This scaling is exclusively for radial symmetric polys...
+    rθ = RadialCoordinate(xy)
+    r̃ = affinetransform(S.I[k],S.I[k+1], rθ.r)
+    y = SVector(r̃*cos(rθ.θ), r̃*sin(rθ.θ))
+    S.P[m][y, n]
+    # if S.P[m] isa Function
+    #     S.P[m](y)[n]
+    # else
+    #     S.P[m][y, n]
+    # end
 end

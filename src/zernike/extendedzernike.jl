@@ -21,27 +21,33 @@ axes(P::ExtendedZernike{T}) where T = (Inclusion(ℝ^2),blockedrange(oneto(∞))
 
 ==(P::ExtendedZernike, Q::ExtendedZernike) = P.a == Q.a && P.b == Q.b
 
-function getindex(P::ExtendedZernike{T},  xy::StaticVector{2}, j::Int)::T where T
-    a, b = convert(T,P.a), convert(T, P.b)
+function getindex(Z::ExtendedZernike{T},  xy::StaticVector{2}, j::Int)::T where T
+    a, b = convert(T,Z.a), convert(T,Z.b)
     @assert a ≈ 0
     s = b    # Fractional power
     d = 2    # Dimension of space
 
-    bl = findblockindex(axes(P,2), j)
+    bl = findblockindex(axes(Z,2), j)
     ℓ = bl.I[1]-1 # degree
     k = bl.α[1] # index of degree
     m = iseven(ℓ) ? k-isodd(k) : k-iseven(k) # Fourier mode
-    n = (ℓ - m)
+    n = (ℓ - m) ÷ 2
+    𝐣 = isodd.(ℓ .- k)
 
-    c1 = T(4)^s*gamma(1+s+n)
-    c2 = gamma((d+2*(m+s+n))/2) / (factorial(n)*gamma((d+s*(m+n))/2))
+    c1 = (4*one(T))^s*gamma(1+s+n)
+    c2 = gamma((d+2*(m+s+n))/2) / (factorial(n)*gamma((d+2*(m+n))/2))
+
 
     xy in UnitDisk{T}() && return c1*c2*Zernike{T}(a, b)[xy, j]
 
+    nrm = sqrt(convert(T,2)^(m+a+b+2-iszero(m))/π) / sqrt((massmatrix(Jacobi{T}(b,a+m)).diag)[n+1])
     c3 = (-1)^n * gamma(d/2+m+n+s)/(gamma(-n-s)*gamma(d/2+m+2n+s+1))
+    
+    rθ = RadialCoordinate(xy)
+    r, θ = rθ.r, rθ.θ
 
-    r2 = first(xy)^2+last(xy)^2
-    return c1*c3*_₂F₁(n+s+1,d/2+m+n+s,d/2+m+2n+s+1,one(T)/r2) / (r2^(d/2+m+n+s))
+    V = 𝐣 == 1 ? r^m*cos(m*θ) : r^m*sin(m*θ)
+    return c1*c3 * nrm * V * _₂F₁(n+s+1,d/2+m+n+s,d/2+m+2n+s+1,one(T)/r^2) / (r^(d+2*(m+n+s)))
 end
 
 #### 
@@ -85,6 +91,5 @@ end
 
 function *(L::AbsLaplacianPower, Q::ExtendedWeightedZernike{T}) where T
     @assert axes(L,1) == axes(Q,1) && Q.a ≈ 0 && Q.b == L.α
-    s = Q.b
     ExtendedZernike{T}(Q.a, Q.b)
 end

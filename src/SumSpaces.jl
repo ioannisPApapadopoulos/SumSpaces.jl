@@ -6,7 +6,7 @@ using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays,
     QuasiArrays, DelimitedFiles, HypergeometricFunctions, BandedMatrices, MultivariateOrthogonalPolynomials,
     SingularIntegrals
 
-import ClassicalOrthogonalPolynomials: ∞, Derivative, jacobimatrix, @simplify, HalfLine, Weight, orthogonalityweight, recurrencecoefficients
+import ClassicalOrthogonalPolynomials: ∞, Derivative, jacobimatrix, @simplify, HalfLine, Weight, orthogonalityweight, recurrencecoefficients, massmatrix
 import SingularIntegrals: sqrtx2, Hilbert, RecurrenceArray
 import Base: in, axes, getindex, ==, oneto, *, \, +, -, convert, broadcasted
 import ContinuumArrays: Basis, AbstractQuasiArray

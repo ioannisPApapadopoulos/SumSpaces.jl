@@ -29,7 +29,7 @@ function getindex(H::ExtendedHermite{T}, x::Real, j::Int)::T where T
         return -(1/sqrt(bπ)) * 2^(1+n-2*floor(n/2)) * x^(n-2*floor(n/2)) * gamma(s + 1/2 + floor((n+1)/2)) * _₁F₁(s + 1/2 + floor((n+1)/2), (1 + 2n - 4*floor(n/2))/2, -x^2)
     elseif s ≈ -0.5
         n == 0 && return 0.0
-        n > 15 && return 0.0
+        # n > 15 && return 0.0
         x^(n - 2*floor(n/2)) / 2 * ((-1)^(floor(n/2) + 1) * gamma(max(1, floor((n - 2)/2)+1)) * (1 - n + 2*floor(n/2)) / sqrt(bπ) + (-1)^floor(n/2) * gamma(floor((n - 1)/2)+1) * _₁F₁(n - floor(n/2), one(T)/2 + n - 2*floor(n/2), -x^2) / gamma(one(T)/2 + n - 2*floor(n/2)))
     else       
         t = 4^s*bπ*x^(n-2*floor(n/2)) * _₁F₁(n+s-floor(n/2)+one(T)/2,n-2floor(n/2)+one(T)/2,-x^2)

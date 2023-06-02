@@ -247,6 +247,9 @@ end
 function *(L::AbsLaplacianPower, G::GeneralExtendedJacobi{T}) where T
     @assert axes(L,1) == axes(G,1)
 
-    @assert L.α == -G.s
-    return ExtendedWeightedJacobi{T}(G.a, G.a)
+    if L.α == -G.s
+        return ExtendedWeightedJacobi{T}(G.a, G.a)
+    else
+        return GeneralExtendedJacobi{T}(G.a, L.α+G.s)
+    end
 end
