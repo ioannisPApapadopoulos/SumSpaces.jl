@@ -84,4 +84,18 @@ using SumSpaces
          end
     end
 
+    @testset "derivative" begin
+        xx = 3:0.1:3
+        for s in [-1/2]
+            P = ExtendedHermite(s)
+            x = axes(P,1)
+            ∂P = Derivative(x) * P
+            ∂p(x, n) = derivative(x->ExtendedHermite{eltype(x)}(s)[x, n], x)
+
+            for n = 1:10
+                @test ∂p.(xx, n) ≈ ∂P[xx, n]
+            end
+        end
+    end
+
 end

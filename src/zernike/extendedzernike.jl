@@ -34,8 +34,8 @@ function getindex(Z::ExtendedZernike{T},  xy::StaticVector{2}, j::Int)::T where 
     n = (ℓ - m) ÷ 2
     𝐣 = isodd.(ℓ .- k)
 
-    c1 = (4*one(T))^s*gamma(1+s+n)
-    c2 = gamma((d+2*(m+s+n))/2) / (factorial(n)*gamma((d+2*(m+n))/2))
+    c1 = (4*one(T))^s*gamma(1+s+n) / gamma(n+one(T))
+    c2 = gamma(d/2+m+s+n) / gamma(d/2+m+n)
 
 
     xy in UnitDisk{T}() && return c1*c2*Zernike{T}(a, b)[xy, j]
