@@ -1,5 +1,5 @@
 using Test, SumSpaces, ClassicalOrthogonalPolynomials
-import ClassicalOrthogonalPolynomials: sqrtx2
+import SingularIntegrals: sqrtx2
 
 
 @testset "ExtendedChebyshev" begin
