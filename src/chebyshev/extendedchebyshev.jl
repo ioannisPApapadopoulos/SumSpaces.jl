@@ -119,19 +119,21 @@ recurrencecoefficients(wU::ExtendedWeightedChebyshevU) where T = recurrencecoeff
 # inner products
 ###
 
-@simplify *(Tc::QuasiAdjoint{<:Any,<:ExtendedChebyshevT}, V::ExtendedWeightedChebyshevT) =
-    ChebyshevT{eltype(Tc)}()'Weighted(ChebyshevT{eltype(V)}())
-@simplify *(Tc::QuasiAdjoint{<:Any,<:ChebyshevT}, V::ExtendedWeightedChebyshevT) =
-    Tc*Weighted(ChebyshevT{eltype(V)}())    
-@simplify *(Tc::QuasiAdjoint{<:Any,<:ExtendedChebyshevT}, V::Weighted{<:Any,<:ChebyshevT}) =
-    ChebyshevT{eltype(Tc)}()'V
+# Not sure what to the goal here is... These are functions supported on different domains
+
+# @simplify *(Tc::QuasiAdjoint{<:Any,<:ExtendedChebyshevT}, V::ExtendedWeightedChebyshevT) =
+#     ChebyshevT{eltype(Tc)}()'Weighted(ChebyshevT{eltype(V)}())
+# @simplify *(Tc::QuasiAdjoint{<:Any,<:ChebyshevT}, V::ExtendedWeightedChebyshevT) =
+#     Tc*Weighted(ChebyshevT{eltype(V)}())    
+# @simplify *(Tc::QuasiAdjoint{<:Any,<:ExtendedChebyshevT}, V::Weighted{<:Any,<:ChebyshevT}) =
+#     ChebyshevT{eltype(Tc)}()'V
 
 
-@simplify function *(Tc::QuasiAdjoint{<:Any,<:ExtendedChebyshevT}, Ũ::ExtendedChebyshevU)
-    M = ChebyshevU{eltype(Tc)}()'ChebyshevT{eltype(Ũ)}() # TODO:Check
-    TT = eltype(M)
-    ApplyArray(hvcat, 2, convert(TT,Inf), Zeros{TT}(1,∞), Zeros{TT}(∞), M)
-end
+# @simplify function *(Tc::QuasiAdjoint{<:Any,<:ExtendedChebyshevT}, Ũ::ExtendedChebyshevU)
+#     M = ChebyshevU{eltype(Tc)}()'ChebyshevT{eltype(Ũ)}() # TODO:Check
+#     TT = eltype(M)
+#     ApplyArray(hvcat, 2, convert(TT,Inf), Zeros{TT}(1,∞), Zeros{TT}(∞), M)
+# end
 
 ######
 # Derivatives
