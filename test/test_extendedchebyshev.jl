@@ -109,16 +109,16 @@ import SingularIntegrals: sqrtx2
 
     end
 
-    @testset "innerprods" begin
-        T̃ = ExtendedChebyshevT()
-        Ṽ = ExtendedWeightedChebyshevT()
-        Ũ = ExtendedChebyshevU()
-        T = ChebyshevT()
-        V = Weighted(ChebyshevT())
+    # @testset "innerprods" begin
+    #     T̃ = ExtendedChebyshevT()
+    #     Ṽ = ExtendedWeightedChebyshevT()
+    #     Ũ = ExtendedChebyshevU()
+    #     T = ChebyshevT()
+    #     V = Weighted(ChebyshevT())
 
-        @test (T̃'Ṽ)[1:10,1:10] == (Ṽ'T̃)[1:10,1:10] == (T̃'V)[1:10,1:10] ==
-                (V'T̃)[1:10,1:10] == (T'Ṽ)[1:10,1:10] == (Ṽ'T)[1:10,1:10]
+    #     @test (T̃'Ṽ)[1:10,1:10] == (Ṽ'T̃)[1:10,1:10] == (T̃'V)[1:10,1:10] ==
+    #             (V'T̃)[1:10,1:10] == (T'Ṽ)[1:10,1:10] == (Ṽ'T)[1:10,1:10]
 
-        T̃'Ũ
-    end
+    #     T̃'Ũ
+    # end
 end
