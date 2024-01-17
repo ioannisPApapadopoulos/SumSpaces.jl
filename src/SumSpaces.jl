@@ -13,7 +13,7 @@ import InfiniteArrays: OneToInf
 import BlockArrays: block, blockindex, Block, _BlockedUnitRange#, BlockSlice
 import BlockBandedMatrices: _BandedBlockBandedMatrix
 import LazyBandedMatrices: Tridiagonal
-import SemiclassicalOrthogonalPolynomials: Interlace
+import LazyArrays: LazyVector
 
 include("chebyshev/extendedchebyshev.jl")
 include("chebyshev/sumspace.jl")
@@ -41,5 +41,17 @@ export  ∞, oneto, Block, Derivative, Hilbert, BlockArray, Fill, Weighted,
 
 # Affine transform to scale and shift polys. 
 affinetransform(a,b,x) = 2 /(b-a) * (x-(a+b)/2)
+
+struct Interlace{T,AA,BB} <: LazyVector{T}
+    a::AA
+    b::BB
+end
+
+Interlace{T}(a::AbstractVector{T}, b::AbstractVector{T}) where T = Interlace{T,typeof(a),typeof(b)}(a,b)
+Interlace(a::AbstractVector{T}, b::AbstractVector{V}) where {T,V} = Interlace{promote_type(T,V)}(a, b)
+
+size(::Interlace) = (ℵ₀,)
+
+getindex(A::Interlace{T}, k::Int) where T = convert(T, isodd(k) ? A.a[(k+1)÷2] : A.b[k÷2])::T
 
 end # module
