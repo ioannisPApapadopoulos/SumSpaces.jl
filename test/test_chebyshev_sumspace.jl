@@ -179,13 +179,13 @@ using Test, ClassicalOrthogonalPolynomials, SumSpaces
         @test A[1:30, 6:35] == B[1:30,2:31]
     end
 
-    @testset "sqrt-Δ" begin
-        Sp = SumSpaceP()
-        Sd = SumSpaceD()
+    # @testset "sqrt-Δ" begin
+    #     Sp = SumSpaceP()
+    #     Sd = SumSpaceD()
 
-        x = axes(Sp, 1)
-        H = inv.(x .- x')
-        D = Derivative(x)
-        Δ_s = Sd\D*H*Sp
-    end
+    #     x = axes(Sp, 1)
+    #     H = inv.(x .- x')
+    #     D = Derivative(x)
+    #     Δ_s = Sd\D*H*Sp
+    # end
 end

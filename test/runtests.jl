@@ -1,5 +1,5 @@
 using Test, SumSpaces
-import SingularIntegrals: sqrtx2
+import SumSpaces: sqrtx2
 
 include("test_extendedchebyshev.jl")
 include("test_chebyshev_sumspace.jl")
