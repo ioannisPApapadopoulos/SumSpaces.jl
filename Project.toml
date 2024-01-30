@@ -1,7 +1,7 @@
 name = "SumSpaces"
 uuid = "c93c2084-ed22-405a-a842-63a57ee579bf"
 authors = ["john.papad "]
-version = "0.1.0"
+version = "0.0.2"
 
 [deps]
 BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
