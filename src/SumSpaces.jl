@@ -6,7 +6,7 @@ using SpecialFunctions, LinearAlgebra, BlockBandedMatrices, BlockArrays,
     QuasiArrays, DelimitedFiles, HypergeometricFunctions, BandedMatrices
 
 import ClassicalOrthogonalPolynomials: ∞, Derivative, jacobimatrix, @simplify, HalfLine, Weight, orthogonalityweight, recurrencecoefficients
-import SingularIntegrals: Hilbert, sqrtx2
+# import SingularIntegrals: Hilbert, sqrtx2
 import Base: in, axes, getindex, ==, oneto, *, \, +, -, convert, broadcasted
 import ContinuumArrays: Basis, AbstractQuasiArray
 import InfiniteArrays: OneToInf
@@ -14,6 +14,11 @@ import BlockArrays: block, blockindex, Block, _BlockedUnitRange#, BlockSlice
 import BlockBandedMatrices: _BandedBlockBandedMatrix
 import LazyBandedMatrices: Tridiagonal
 import LazyArrays: LazyVector
+
+const ConvKernel{T,D1,V,D2} = BroadcastQuasiMatrix{T,typeof(-),Tuple{D1,QuasiAdjoint{V,Inclusion{V,D2}}}}
+const Hilbert{T,D1,D2} = BroadcastQuasiMatrix{T,typeof(inv),Tuple{ConvKernel{T,Inclusion{T,D1},T,D2}}}
+sqrtx2(z::Number) = sqrt(z-1)*sqrt(z+1)
+sqrtx2(x::Real) = sign(x)*sqrt(x^2-1)
 
 include("chebyshev/extendedchebyshev.jl")
 include("chebyshev/sumspace.jl")

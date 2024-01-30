@@ -211,7 +211,7 @@ function \(Sd::ElementSumSpaceD, ASp::ElementAppendedSumSpace)
     Bm = _Id_Sp_Sd(ASp)[1:2N+7+(el_no-1)*(2N+6),1:2N+3+(el_no-1)*(2N+2)]
     Bm[3*el_no+2,1] = 1.
     
-    rows = [size(Bm,1)]; cols = vcat([1], Fill(el_no, (2*N+6)))
+    rows = [Base.size(Bm,1)]; cols = vcat([1], Fill(el_no, (2*N+6)))
     A = BlockBandedMatrix(Zeros(sum(rows),sum(cols)), rows, cols, (sum(rows),sum(cols)))
     
     A[1:end,1:end] = Bm*Id
