@@ -10,7 +10,7 @@ using SumSpacesMathLink
 """
 This script implements the "Nonsmooth right-hand side" example found in
 
-"A sparse spectral method for a one-dimensional fractional PDE problem" by I. P. A. Papadopoulos and S. Olver. 
+"A sparse spectral method for fractional differential equations in one-spatial dimension" by I. P. A. Papadopoulos and S. Olver. 
 
 We first approximate the error of a nonsmooth function f(x) = asin(x) if |x| ≤ 1, asin(1) sign(x) exp(-|x| + 1)
 otherwise, as expanded in the sum space and dual sum space. 

@@ -10,7 +10,7 @@ using SumSpacesMathLink
 """
 This script implements the "Manafactured solutions (second case)" example found in
 
-"A sparse spectral method for a one-dimensional fractional PDE problem" by I. P. A. Papadopoulos and S. Olver. 
+"A sparse spectral method for fractional differential equations in one-spatial dimension" by I. P. A. Papadopoulos and S. Olver. 
 
 We want to solve 
 
@@ -114,7 +114,7 @@ end
 ###
 # Plot spectral convergence of error
 ###
-errors = readdlm("errors-x-inf-ex2.txt") 
+# errors = readdlm("old_logs/errors-x-inf-ex2.txt")
 N = Int32.(errors[:,2])
 errors = errors[:,1]
 plot(N, errors, #log10.(errors),
@@ -122,7 +122,7 @@ plot(N, errors, #log10.(errors),
     legend=false,
     ylabel=L"$\infty\mathrm{-norm \;\; error}$",
     xlabel=L"$n$",
-    ylim=[1e-15, 1e-3],
+    ylim=[1e-15, 1e-2],
     yscale=:log10,
     xtickfontsize=10, ytickfontsize=10,xlabelfontsize=15,ylabelfontsize=15,
     linewidth=2,

@@ -6,7 +6,7 @@ using DelimitedFiles, LaTeXStrings, FFTW
 """
 This script implements the "Wave propagation" example found in
 
-"A sparse spectral method for a one-dimensional fractional PDE problem" by I. P. A. Papadopoulos and S. Olver. 
+"A sparse spectral method for fractional differential equations in one-spatial dimension" by I. P. A. Papadopoulos and S. Olver. 
 
 We want to solve 
 

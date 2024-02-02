@@ -10,7 +10,7 @@ using SumSpacesMathLink
 """
 This script implements the "Discontinuous right-hand side" example found in
 
-"A sparse spectral method for a one-dimensional fractional PDE problem" by I. P. A. Papadopoulos and S. Olver. 
+"A sparse spectral method for fractional differential equations in one-spatial dimension" by I. P. A. Papadopoulos and S. Olver. 
 
 We first approximate the error of a discontinuous function f(x) = 1 if |x| ≤ 1, 0 otherwise, as expanded
 in the sum space and dual sum space. 
